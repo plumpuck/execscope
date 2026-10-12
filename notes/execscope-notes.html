@@ -112,8 +112,8 @@ th{color:var(--muted);font-weight:500;font-size:13px}
   <!-- 进度 -->
   <section class="panel" id="tab-progress">
     <div class="callout">
-      <h2>现在要做的一步：放大实验（改为 10000 手）</h2>
-      <p>买 100000 手时程序报错：ValueError，金额 13,840,923,975 超过引擎金额上限 9,223,372,036（不是保证金问题）。原因是 6E 合约 1 手对应 125,000 欧元，100000 手的名义金额约 138 亿美元。改成 10000 手（约 13.8 亿美元），验证滑点是否仍只有 1 个价位。具体步骤见聊天。</p>
+      <h2>现在要做的一步：写第一个 TCA 函数和测试</h2>
+      <p>放大实验确认：买 10000 手也只是 52 手@1.10780 + 9948 手@1.10785，只多滑 1 个最小价位。下一步把这些观察到的数字变成代码：tca.py 里写平均价、滑点（基点）、成本（美元）三个函数，test_tca.py 用我们亲眼看到的数字验证它们。具体步骤见聊天。</p>
       <p class="note" style="margin-top:10px">新开 PowerShell 窗口时要先运行 <code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</code>，再运行 <code>.\.venv\Scripts\Activate.ps1</code>，看到 (.venv) 再继续。命令一条一条粘贴，不要连成一行。</p>
     </div>
     <div class="card" id="checklist"></div>
@@ -237,7 +237,8 @@ th{color:var(--muted);font-weight:500;font-size:13px}
      {id:'r3',x:1,t:'对照脚本 7 个步骤看懂输出',n:'peek_bar 实验已做：Wrangler 把表格行翻译成 Bar'},
      {id:'r5',x:1,t:'下出第一笔订单',n:'买 1 手：Total orders 1，Total positions 1，成交价 1.10780'},
      {id:'r6',x:1,t:'大单实验：买 1000 手（第一根 K 线成交量只有 205）',n:'完成：1 单 2 笔成交，52 手@1.10780 + 948 手@1.10785，手续费 0'},
-     {id:'r7',t:'放大实验：买 10000 手，看滑点是否仍然只有 1 个最小价位',n:'100000 手超过金额上限报错，改用 10000 手'},
+     {id:'r7',x:1,t:'放大实验：买 10000 手，看滑点是否仍然只有 1 个最小价位',n:'确认：52 手@1.10780 + 9948 手@1.10785，约 0.45 基点，每手约 6.2 美元'},
+     {id:'r8',t:'把观察到的数字写成第一个 TCA 函数和单元测试（tca.py、test_tca.py）',n:'阶段 3 的开始'},
      {id:'r4',t:'读 fx_ema_cross 例子里的 FillModel（成交模型）部分',n:'它读取测试数据目录，pip 安装版大概率找不到数据，要先处理'}]},
    {t:'阶段 3 · 做自己的部分（第 3 天起）',items:[
      {id:'b1',t:'M0 数据与父单场景'},
@@ -271,6 +272,10 @@ th{color:var(--muted);font-weight:500;font-size:13px}
 
   /* 概念 */
   var C=[
+   ['放大实验结论：默认滑点有上限','回测',
+    '默认引擎下，订单再大，每手多付的钱也只有约 1 个最小价位（欧元期货约 6.25 美元/手）。',
+    '三次实验对比（起始价 1.10780）：1 手→平均价 1.10780，滑点 0；1000 手→52@1.10780 + 948@1.10785，平均价 1.1078474，约 0.43 基点，总成本约 5,925 美元（约 5.9 美元/手）；10000 手→52@1.10780 + 9948@1.10785，平均价 1.10784974，约 0.45 基点，总成本约 62,175 美元（约 6.2 美元/手）。手数增大 10 倍，每手成本几乎不变。真实市场里，更大的单通常会把价格推得更远，所以默认回测可能低估大单成本；这一点要在后面用成交模型和拆单实验继续检验，并查文献确认。',
+    '“我用控制变量实验证明默认回测对大单的滑点有上限，成本被低估。”'],
    ['合约乘数与名义金额','期货',
     '期货 1 手代表一大笔标的资产：名义金额 = 手数 × 价格 × 合约乘数。',
     '这个例子里的欧元期货合约乘数是 125,000（由报错数据反推：13,840,923,975 ÷ (99,948 × 1.10785) ≈ 125,000）。所以买 1 手名义金额约 13.8 万美元，1000 手约 1.38 亿美元，100000 手约 138 亿美元。引擎里 Money 的最大值约 92.2 亿，超过会抛 ValueError。',
@@ -441,13 +446,13 @@ th{color:var(--muted);font-weight:500;font-size:13px}
    {s:'命令粘贴多遍，最后出现 >> 提示符，没有输出',c:'其中一遍缺了结尾引号，PowerShell 以为命令没写完，在等待继续输入',f:'按 Ctrl+C 退出，再把命令只粘贴一次',st:'done'},
    {s:'日志里的中文显示成乱码（宸叉彁浜よ鍗?）',c:'Windows 把输出重定向到文件时的编码与 Python 的 UTF-8 不一致',f:'日志、print 里先用英文；不影响回测结果',st:'done'},
    {s:'新开 PowerShell 窗口后运行 python run_order.py，Select-String 没有任何输出',c:'提示符是 PS C:\\Users\\HP>，没有 (.venv)，也不在例子文件夹，找不到 run_order.py，报错被存进了 output3.txt',f:'新窗口先做四步：Set-ExecutionPolicy、cd execscope、激活 .venv、cd 到例子文件夹；看到 (.venv) 和文件夹路径再运行',st:'done'},
-   {s:'Select-String 命令又被连续粘贴多遍，出现 >> 提示符',c:'同一条命令粘贴了几次连成一行，且缺结尾引号',f:'Ctrl+C 退出；每条命令只复制一次、只粘贴一次',st:'doing'},
+   {s:'Select-String 命令又被连续粘贴多遍，出现 >> 提示符',c:'同一条命令粘贴了几次连成一行，且缺结尾引号',f:'Ctrl+C 退出；每条命令只复制一次、只粘贴一次',st:'done'},
    {s:'(旧)大单实验结果里仍然是 BUY 1，Quantity(1)，不是 1000',c:'order_strategy.py 没有真正改成 make_qty(1000)（可能没保存，或存到了别的文件夹/变成 .txt）',f:'用 Select-String order_strategy.py -Pattern "make_qty" 检查当前数值，再在例子文件夹里重新用 notepad 修改并保存',st:'doing'},
    {s:'大单实验仍显示 BUY 1（已解决）',c:'order_strategy.py 没有真正改成 make_qty(1000)',f:'重新在例子文件夹里用 notepad 保存；输出变成 BUY 1_000，成交 52+948',st:'done'},
-   {s:'买 100000 手时 Traceback：ValueError invalid value greater than MONEY_MAX 9_223_372_036.0, was 13_840_923_975.0',c:'计算手续费时要算名义金额（手数×价格×合约乘数 125000），超过了 Money 的上限；一开始我猜成保证金不足，是错的',f:'把数量降到 10000 手（名义约 13.8 亿美元，低于上限）；以后先估算名义金额再选手数',st:'doing'},
+   {s:'买 100000 手时 Traceback：ValueError invalid value greater than MONEY_MAX 9_223_372_036.0, was 13_840_923_975.0',c:'计算手续费时要算名义金额（手数×价格×合约乘数 125000），超过了 Money 的上限；一开始我猜成保证金不足，是错的',f:'把数量降到 10000 手（名义约 13.8 亿美元，低于上限）；以后先估算名义金额再选手数',st:'done'},
    {s:'fx_ema_cross_audusd_ticks.py 可能找不到测试数据',c:'推测：源码里 TEST_DATA_DIR 指向包目录旁的 tests/test_data，pip 安装版大概率没有这个目录（只读源码判断，未实际运行）',f:'先用自带数据的 example_01；之后要用 FillModel 时再处理数据路径',st:'todo'}
   ];
-  var logs=S.get('logs7',null); if(!logs||!logs.length)logs=seed.slice();
+  var logs=S.get('logs8',null); if(!logs||!logs.length)logs=seed.slice();
   var stName={todo:'待处理',doing:'处理中',done:'已解决'};
   function renderLog(){
     var h=''; logs.forEach(function(l,i){
@@ -458,16 +463,16 @@ th{color:var(--muted);font-weight:500;font-size:13px}
     document.getElementById('loglist').innerHTML=h;
   }
   document.getElementById('loglist').addEventListener('change',function(e){
-    var i=e.target.dataset.st; if(i==null)return; logs[+i].st=e.target.value; S.set('logs7',logs); renderLog();
+    var i=e.target.dataset.st; if(i==null)return; logs[+i].st=e.target.value; S.set('logs8',logs); renderLog();
   });
   document.getElementById('loglist').addEventListener('click',function(e){
-    var b=e.target.closest('[data-del]'); if(!b)return; logs.splice(+b.dataset.del,1); S.set('logs7',logs); renderLog();
+    var b=e.target.closest('[data-del]'); if(!b)return; logs.splice(+b.dataset.del,1); S.set('logs8',logs); renderLog();
   });
   document.getElementById('logform').addEventListener('submit',function(e){
     e.preventDefault();
     var s=document.getElementById('f_sym').value.trim(); if(!s)return;
     logs.push({s:s,c:document.getElementById('f_cause').value.trim()||'待查',f:document.getElementById('f_fix').value.trim()||'待定',st:document.getElementById('f_st').value});
-    S.set('logs7',logs); ['f_sym','f_cause','f_fix'].forEach(function(id){document.getElementById(id).value=''}); renderLog();
+    S.set('logs8',logs); ['f_sym','f_cause','f_fix'].forEach(function(id){document.getElementById(id).value=''}); renderLog();
   });
   document.getElementById('copyLog').addEventListener('click',function(){
     var md='# debug-log\n\n'+logs.map(function(l,i){return '## '+(i+1)+'. '+l.s+'\n- 状态：'+stName[l.st]+'\n- 原因：'+l.c+'\n- 解决：'+l.f+'\n'}).join('\n');

@@ -11,11 +11,13 @@ models change the answer?
 - [x] Environment: venv + `nautilus_trader==1.231.0`
 - [x] Ran the official `example_01_load_bars_from_custom_csv` backtest
 - [x] First order: buy 1 contract, 1 order / 1 position, fill at bar close, zero commission
-- [ ] Large-order experiment (1000 contracts vs. 205 bar volume)
+- [x] Large-order experiments: 1 / 1000 / 10000 contracts → default slippage stays about one tick (~$6/contract)
+- [ ] TCA functions + unit tests (`src/tca.py`, `src/test_tca.py`)
 - [ ] M0 parent-order scenario, M1 TWAP, M2 TCA metrics and unit tests
 
 ## Layout
 - `notes/` plan, learning notes, debug log, interactive notes page (`execscope-notes.html`)
+- `src/` TCA helpers and their tests (pure Python)
 - `examples/` small scripts written while learning (they import files of the official example)
 
 ## Credit
