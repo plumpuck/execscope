@@ -10,6 +10,12 @@
 **正在做：** 大单实验——买 1000 手（第一根 K 线成交量只有 205），为“默认成交太乐观”拿到第一个证据。
 **接下来：** M0 造“大额父单”场景 → M1 实现 TWAP → M2 算滑点/实施缺口并写测试。
 
+## 工作约定
+- 每次回复开头先回顾：为什么做、已完成、正在做、接下来。
+- 每次交流后，把重点写入学习笔记，并同步到 GitHub（plumpuck/execscope）和 Project。
+- 命令一条一条复制、粘贴、回车；如果出现 `>>`，按 Ctrl+C 退出。
+- 新开 PowerShell 窗口要做四步：Set-ExecutionPolicy → cd execscope → 激活 .venv → cd 到例子文件夹。
+
 ## 当前进度（2026-10-08）
 - [x] 规划完成（项目、动机、设计、实验、读码路线、日程）
 - [x] 公共环境已清理（用户目录 10 个包已卸载，Anaconda 原版本恢复：pandas 2.2.3、fsspec 2025.3.2）
@@ -19,7 +25,7 @@
 - [x] CSV 共 10 行（1 表头 + 9 数据），与 9 根 K 线一致
 - [x] 对照 run_example.py 7 步读懂输出；peek_bar.py 实验：表格行 → Bar（价格统一 5 位小数、带品种和周期、时间为纳秒整数）
 - [x] 第一笔订单：OrderStrategy 在第一根 K 线买 1 手 → Total orders 1，Total positions 1，成交价 1.10780（等于该 K 线收盘价），commission 0，TAKER
-- [ ] 大单实验：买 1000 手（第一根 K 线成交量 205），先猜后验证
+- [ ] 大单实验：买 1000 手（第一根 K 线成交量 205），已运行 run_order.py，等待查看 output3.txt 的结果（先猜后验证）
 - [ ] 建 `debug-log.md`
 
 ## 每次新开 PowerShell 的固定动作
@@ -63,6 +69,8 @@
 | 10 | 在 C:\Users\HP 里运行了 notepad order_strategy.py | 没先 cd 到例子文件夹 | 先看路径或 pwd；多出的文件无害 | 已解决 |
 | 11 | 命令粘贴多遍后出现 >> 提示符 | 缺结尾引号，PowerShell 等待继续输入 | Ctrl+C，命令只粘贴一次 | 已解决 |
 | 12 | 日志中文乱码 | 重定向到文件的编码与 UTF-8 不一致 | 日志先用英文 | 已解决 |
+| 13 | 新开窗口后 Select-String 无输出 | 没有 (.venv)、不在例子文件夹，run_order.py 找不到，报错被存进 output3.txt | 新窗口先做四步准备 | 已解决 |
+| 14 | Select-String 又被连续粘贴，出现 >> | 命令连成一行、缺结尾引号 | Ctrl+C，只粘贴一次 | 处理中 |
 | 7 | fx_ema_cross 例子可能找不到测试数据 | 推测：TEST_DATA_DIR 指向包目录旁 tests/test_data（只读源码判断，未运行） | 先用 example_01 | 待处理 |
 
 ## 决定记录
