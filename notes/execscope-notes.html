@@ -236,7 +236,7 @@ th{color:var(--muted);font-weight:500;font-size:13px}
      {id:'r2',x:1,t:'跑通 example_01 最小回测',n:'已跑通：9 根 K 线，0 单'},
      {id:'r3',x:1,t:'对照脚本 7 个步骤看懂输出',n:'peek_bar 实验已做：Wrangler 把表格行翻译成 Bar'},
      {id:'r5',x:1,t:'下出第一笔订单',n:'买 1 手：Total orders 1，Total positions 1，成交价 1.10780'},
-     {id:'r6',t:'大单实验：买 1000 手（第一根 K 线成交量只有 205）',n:'先猜结果再运行'},
+     {id:'r6',t:'大单实验：买 1000 手（第一根 K 线成交量只有 205）',n:'第一次运行实际还是 1 手，文件没改成功，待重做'},
      {id:'r4',t:'读 fx_ema_cross 例子里的 FillModel（成交模型）部分',n:'它读取测试数据目录，pip 安装版大概率找不到数据，要先处理'}]},
    {t:'阶段 3 · 做自己的部分（第 3 天起）',items:[
      {id:'b1',t:'M0 数据与父单场景'},
@@ -433,9 +433,10 @@ th{color:var(--muted);font-weight:500;font-size:13px}
    {s:'日志里的中文显示成乱码（宸叉彁浜よ鍗?）',c:'Windows 把输出重定向到文件时的编码与 Python 的 UTF-8 不一致',f:'日志、print 里先用英文；不影响回测结果',st:'done'},
    {s:'新开 PowerShell 窗口后运行 python run_order.py，Select-String 没有任何输出',c:'提示符是 PS C:\\Users\\HP>，没有 (.venv)，也不在例子文件夹，找不到 run_order.py，报错被存进了 output3.txt',f:'新窗口先做四步：Set-ExecutionPolicy、cd execscope、激活 .venv、cd 到例子文件夹；看到 (.venv) 和文件夹路径再运行',st:'done'},
    {s:'Select-String 命令又被连续粘贴多遍，出现 >> 提示符',c:'同一条命令粘贴了几次连成一行，且缺结尾引号',f:'Ctrl+C 退出；每条命令只复制一次、只粘贴一次',st:'doing'},
+   {s:'大单实验结果里仍然是 BUY 1，Quantity(1)，不是 1000',c:'order_strategy.py 没有真正改成 make_qty(1000)（可能没保存，或存到了别的文件夹/变成 .txt）',f:'用 Select-String order_strategy.py -Pattern "make_qty" 检查当前数值，再在例子文件夹里重新用 notepad 修改并保存',st:'doing'},
    {s:'fx_ema_cross_audusd_ticks.py 可能找不到测试数据',c:'推测：源码里 TEST_DATA_DIR 指向包目录旁的 tests/test_data，pip 安装版大概率没有这个目录（只读源码判断，未实际运行）',f:'先用自带数据的 example_01；之后要用 FillModel 时再处理数据路径',st:'todo'}
   ];
-  var logs=S.get('logs4',null); if(!logs||!logs.length)logs=seed.slice();
+  var logs=S.get('logs5',null); if(!logs||!logs.length)logs=seed.slice();
   var stName={todo:'待处理',doing:'处理中',done:'已解决'};
   function renderLog(){
     var h=''; logs.forEach(function(l,i){
@@ -446,16 +447,16 @@ th{color:var(--muted);font-weight:500;font-size:13px}
     document.getElementById('loglist').innerHTML=h;
   }
   document.getElementById('loglist').addEventListener('change',function(e){
-    var i=e.target.dataset.st; if(i==null)return; logs[+i].st=e.target.value; S.set('logs4',logs); renderLog();
+    var i=e.target.dataset.st; if(i==null)return; logs[+i].st=e.target.value; S.set('logs5',logs); renderLog();
   });
   document.getElementById('loglist').addEventListener('click',function(e){
-    var b=e.target.closest('[data-del]'); if(!b)return; logs.splice(+b.dataset.del,1); S.set('logs4',logs); renderLog();
+    var b=e.target.closest('[data-del]'); if(!b)return; logs.splice(+b.dataset.del,1); S.set('logs5',logs); renderLog();
   });
   document.getElementById('logform').addEventListener('submit',function(e){
     e.preventDefault();
     var s=document.getElementById('f_sym').value.trim(); if(!s)return;
     logs.push({s:s,c:document.getElementById('f_cause').value.trim()||'待查',f:document.getElementById('f_fix').value.trim()||'待定',st:document.getElementById('f_st').value});
-    S.set('logs4',logs); ['f_sym','f_cause','f_fix'].forEach(function(id){document.getElementById(id).value=''}); renderLog();
+    S.set('logs5',logs); ['f_sym','f_cause','f_fix'].forEach(function(id){document.getElementById(id).value=''}); renderLog();
   });
   document.getElementById('copyLog').addEventListener('click',function(){
     var md='# debug-log\n\n'+logs.map(function(l,i){return '## '+(i+1)+'. '+l.s+'\n- 状态：'+stName[l.st]+'\n- 原因：'+l.c+'\n- 解决：'+l.f+'\n'}).join('\n');

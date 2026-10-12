@@ -25,7 +25,7 @@
 - [x] CSV 共 10 行（1 表头 + 9 数据），与 9 根 K 线一致
 - [x] 对照 run_example.py 7 步读懂输出；peek_bar.py 实验：表格行 → Bar（价格统一 5 位小数、带品种和周期、时间为纳秒整数）
 - [x] 第一笔订单：OrderStrategy 在第一根 K 线买 1 手 → Total orders 1，Total positions 1，成交价 1.10780（等于该 K 线收盘价），commission 0，TAKER
-- [ ] 大单实验：买 1000 手（第一根 K 线成交量 205），已运行 run_order.py，等待查看 output3.txt 的结果（先猜后验证）
+- [ ] 大单实验：买 1000 手（第一根 K 线成交量 205），第一次运行结果仍是买 1 手（文件没改成功），待重做
 - [ ] 建 `debug-log.md`
 
 ## 每次新开 PowerShell 的固定动作
@@ -71,6 +71,7 @@
 | 12 | 日志中文乱码 | 重定向到文件的编码与 UTF-8 不一致 | 日志先用英文 | 已解决 |
 | 13 | 新开窗口后 Select-String 无输出 | 没有 (.venv)、不在例子文件夹，run_order.py 找不到，报错被存进 output3.txt | 新窗口先做四步准备 | 已解决 |
 | 14 | Select-String 又被连续粘贴，出现 >> | 命令连成一行、缺结尾引号 | Ctrl+C，只粘贴一次 | 处理中 |
+| 15 | 大单实验输出仍是 BUY 1、Quantity(1) | order_strategy.py 没有真正改成 make_qty(1000)（可能没保存或存错位置） | 用 Select-String 检查 make_qty 的数值，再在例子文件夹里重新修改保存 | 处理中 |
 | 7 | fx_ema_cross 例子可能找不到测试数据 | 推测：TEST_DATA_DIR 指向包目录旁 tests/test_data（只读源码判断，未运行） | 先用 example_01 | 待处理 |
 
 ## 决定记录
