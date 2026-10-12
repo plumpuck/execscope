@@ -113,8 +113,8 @@ th{color:var(--muted);font-weight:500;font-size:13px}
   <!-- 进度 -->
   <section class="panel" id="tab-progress">
     <div class="callout">
-      <h2>现在要做的一步：写 TWAP 拆单函数</h2>
-      <p>TCA 的 4 个单元测试已全部通过。下一步写 twap.py：把一笔大单平均拆成 N 份（余数分给前几份，如 10 拆 3 份＝4、3、3），并用 test_twap.py 验证。之后再把它接进回测：9 根 K 线每根买一份，和“一次买完”比较成本。具体步骤见聊天。</p>
+      <h2>现在要做的一步：自己写 interval_vwap</h2>
+      <p>你已经装好 VS Code，想锻炼真正的编程能力，所以这一步改成“我给测试，你自己写函数”。在 VS Code 里新建 vwap.py 和 test_vwap.py，把 interval_vwap 写出来，让 5 个测试全部显示 OK。它是 TCA 里“相对区间 VWAP”需要的函数。</p>
       <p class="note" style="margin-top:10px">新开 PowerShell 窗口时要先运行 <code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</code>，再运行 <code>.\.venv\Scripts\Activate.ps1</code>，看到 (.venv) 再继续。命令一条一条粘贴，不要连成一行。</p>
     </div>
     <div class="card" id="checklist"></div>
@@ -331,7 +331,9 @@ th{color:var(--muted);font-weight:500;font-size:13px}
      {id:'r6',x:1,t:'大单实验：买 1000 手（第一根 K 线成交量只有 205）',n:'完成：1 单 2 笔成交，52 手@1.10780 + 948 手@1.10785，手续费 0'},
      {id:'r7',x:1,t:'放大实验：买 10000 手，看滑点是否仍然只有 1 个最小价位',n:'确认：52 手@1.10780 + 9948 手@1.10785，约 0.45 基点，每手约 6.2 美元'},
      {id:'r8',x:1,t:'把观察到的数字写成第一个 TCA 函数和单元测试（tca.py、test_tca.py）',n:'4 个测试全部通过'},
-     {id:'r9',t:'写 TWAP 拆单函数和测试（twap.py、test_twap.py）',n:'把 10000 手平均拆成 9 份，对应例子里的 9 根 K 线'},
+     {id:'r9',x:1,t:'写 TWAP 拆单函数和测试（twap.py、test_twap.py）',n:'5 个测试全部通过'},
+     {id:'r10',x:1,t:'安装 VS Code',n:'用户已装好，之后在 VS Code 里写代码'},
+     {id:'r11',t:'自己写 interval_vwap（vwap.py），让 test_vwap.py 全部通过',n:'第一次自己写函数：区间成交量加权均价'},
      {id:'r4',t:'读 fx_ema_cross 例子里的 FillModel（成交模型）部分',n:'它读取测试数据目录，pip 安装版大概率找不到数据，要先处理'}]},
    {t:'阶段 3 · 做自己的部分（第 3 天起）',items:[
      {id:'b1',t:'M0 数据与父单场景'},
@@ -365,6 +367,14 @@ th{color:var(--muted);font-weight:500;font-size:13px}
 
   /* 概念 */
   var C=[
+   ['滑点基点怎么读','TCA',
+    '滑点基点＝平均多付了起始价的万分之几。',
+    '起始价（到达价）是“如果瞬间买完、价格不动”的参照；大单分多笔成交，所以要用数量加权的平均成交价去比；用基点（1 基点＝0.01%）是为了不同价格的品种可以比较。例：52 手@1.10780 + 948 手@1.10785，平均 1.1078474，比 1.10780 多 0.0000474，÷1.10780 ≈ 0.43 基点。',
+    '“我用平均成交价相对到达价的基点差衡量执行成本，便于跨品种、跨订单比较。”'],
+   ['为什么 10 拆 3 是 [4,3,3]','算法',
+    '拆出来的各份加起来必须等于父单总数，所以余数要分出去。',
+    '10 ÷ 3 = 3 余 1（divmod(10,3) 得到 (3,1)）。[3,3,3] 总共只有 9，少了 1 手，对不上父单；所以余下的 1 手加到第一份，变成 [4,3,3]。规则：余几，就让前几份各多 1。',
+    '“拆单后我保证子单数量之和等于父单，并用单元测试检验。”'],
    ['单元测试（unit test）','工程',
     '用几组已知答案检查一个小函数是否算对，改代码后可以立刻重新检查。',
     'test_tca.py 用我们亲眼看到的成交数据（52 手@1.10780 + 948 手@1.10785 等）作为“标准答案”，检查 average_price、slippage_bps、cost_usd。4 个测试都显示 OK。以后改动公式，只要重新运行测试，就知道有没有改坏。',
@@ -549,7 +559,7 @@ th{color:var(--muted);font-weight:500;font-size:13px}
    {s:'买 100000 手时 Traceback：ValueError invalid value greater than MONEY_MAX 9_223_372_036.0, was 13_840_923_975.0',c:'计算手续费时要算名义金额（手数×价格×合约乘数 125000），超过了 Money 的上限；一开始我猜成保证金不足，是错的',f:'把数量降到 10000 手（名义约 13.8 亿美元，低于上限）；以后先估算名义金额再选手数',st:'done'},
    {s:'fx_ema_cross_audusd_ticks.py 可能找不到测试数据',c:'推测：源码里 TEST_DATA_DIR 指向包目录旁的 tests/test_data，pip 安装版大概率没有这个目录（只读源码判断，未实际运行）',f:'先用自带数据的 example_01；之后要用 FillModel 时再处理数据路径',st:'todo'}
   ];
-  var logs=S.get('logs8',null); if(!logs||!logs.length)logs=seed.slice();
+  var logs=S.get('logs9',null); if(!logs||!logs.length)logs=seed.slice();
   var stName={todo:'待处理',doing:'处理中',done:'已解决'};
   function renderLog(){
     var h=''; logs.forEach(function(l,i){
@@ -560,16 +570,16 @@ th{color:var(--muted);font-weight:500;font-size:13px}
     document.getElementById('loglist').innerHTML=h;
   }
   document.getElementById('loglist').addEventListener('change',function(e){
-    var i=e.target.dataset.st; if(i==null)return; logs[+i].st=e.target.value; S.set('logs8',logs); renderLog();
+    var i=e.target.dataset.st; if(i==null)return; logs[+i].st=e.target.value; S.set('logs9',logs); renderLog();
   });
   document.getElementById('loglist').addEventListener('click',function(e){
-    var b=e.target.closest('[data-del]'); if(!b)return; logs.splice(+b.dataset.del,1); S.set('logs8',logs); renderLog();
+    var b=e.target.closest('[data-del]'); if(!b)return; logs.splice(+b.dataset.del,1); S.set('logs9',logs); renderLog();
   });
   document.getElementById('logform').addEventListener('submit',function(e){
     e.preventDefault();
     var s=document.getElementById('f_sym').value.trim(); if(!s)return;
     logs.push({s:s,c:document.getElementById('f_cause').value.trim()||'待查',f:document.getElementById('f_fix').value.trim()||'待定',st:document.getElementById('f_st').value});
-    S.set('logs8',logs); ['f_sym','f_cause','f_fix'].forEach(function(id){document.getElementById(id).value=''}); renderLog();
+    S.set('logs9',logs); ['f_sym','f_cause','f_fix'].forEach(function(id){document.getElementById(id).value=''}); renderLog();
   });
   document.getElementById('copyLog').addEventListener('click',function(){
     var md='# debug-log\n\n'+logs.map(function(l,i){return '## '+(i+1)+'. '+l.s+'\n- 状态：'+stName[l.st]+'\n- 原因：'+l.c+'\n- 解决：'+l.f+'\n'}).join('\n');
