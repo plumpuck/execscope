@@ -112,8 +112,8 @@ th{color:var(--muted);font-weight:500;font-size:13px}
   <!-- 进度 -->
   <section class="panel" id="tab-progress">
     <div class="callout">
-      <h2>现在要做的一步：放大实验</h2>
-      <p>1000 手的大单实验已完成：1 个订单分成 2 笔成交，52 手成交在 1.10780，其余 948 手成交在 1.10785（只差 1 个最小价位）。下一步把数量改成 100000 手，验证推测：不管多大，默认只多滑 1 个价位。具体步骤见聊天。</p>
+      <h2>现在要做的一步：放大实验（改为 10000 手）</h2>
+      <p>买 100000 手时程序报错：ValueError，金额 13,840,923,975 超过引擎金额上限 9,223,372,036（不是保证金问题）。原因是 6E 合约 1 手对应 125,000 欧元，100000 手的名义金额约 138 亿美元。改成 10000 手（约 13.8 亿美元），验证滑点是否仍只有 1 个价位。具体步骤见聊天。</p>
       <p class="note" style="margin-top:10px">新开 PowerShell 窗口时要先运行 <code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</code>，再运行 <code>.\.venv\Scripts\Activate.ps1</code>，看到 (.venv) 再继续。命令一条一条粘贴，不要连成一行。</p>
     </div>
     <div class="card" id="checklist"></div>
@@ -237,7 +237,7 @@ th{color:var(--muted);font-weight:500;font-size:13px}
      {id:'r3',x:1,t:'对照脚本 7 个步骤看懂输出',n:'peek_bar 实验已做：Wrangler 把表格行翻译成 Bar'},
      {id:'r5',x:1,t:'下出第一笔订单',n:'买 1 手：Total orders 1，Total positions 1，成交价 1.10780'},
      {id:'r6',x:1,t:'大单实验：买 1000 手（第一根 K 线成交量只有 205）',n:'完成：1 单 2 笔成交，52 手@1.10780 + 948 手@1.10785，手续费 0'},
-     {id:'r7',t:'放大实验：买 100000 手，看滑点是否仍然只有 1 个最小价位',n:'验证“默认滑点有上限”的推测'},
+     {id:'r7',t:'放大实验：买 10000 手，看滑点是否仍然只有 1 个最小价位',n:'100000 手超过金额上限报错，改用 10000 手'},
      {id:'r4',t:'读 fx_ema_cross 例子里的 FillModel（成交模型）部分',n:'它读取测试数据目录，pip 安装版大概率找不到数据，要先处理'}]},
    {t:'阶段 3 · 做自己的部分（第 3 天起）',items:[
      {id:'b1',t:'M0 数据与父单场景'},
@@ -271,6 +271,10 @@ th{color:var(--muted);font-weight:500;font-size:13px}
 
   /* 概念 */
   var C=[
+   ['合约乘数与名义金额','期货',
+    '期货 1 手代表一大笔标的资产：名义金额 = 手数 × 价格 × 合约乘数。',
+    '这个例子里的欧元期货合约乘数是 125,000（由报错数据反推：13,840,923,975 ÷ (99,948 × 1.10785) ≈ 125,000）。所以买 1 手名义金额约 13.8 万美元，1000 手约 1.38 亿美元，100000 手约 138 亿美元。引擎里 Money 的最大值约 92.2 亿，超过会抛 ValueError。',
+    '“我先用名义金额衡量订单规模，而不是只看手数，避免高估或低估冲击。”'],
    ['大单的默认成交规则（观察 + 源码）','回测',
     '默认引擎把 K 线成交量分成 4 份，大单先吃掉当前价位的量，剩下的整体只多滑 1 个最小价位。',
     '观察：买 1000 手，第一根 K 线成交量 205，得到 52 手@1.10780 和 948 手@1.10785，手续费 0。源码（develop_v1 分支 crates/execution/src/matching_engine/engine.rs）：BarTickSizes::from_volume 把 205 分成 开/高/低 各 51、收 52；注释 “Exhausted L1 volume: slip remainder by a single price increment” 说明用完当前量后，剩余部分按最后成交价加 1 个价位成交。平均成交价 1.1078474，相对 1.10780 约 0.43 个基点。注意：这是读 develop_v1 源码的解释，安装的 1.231.0 行为与观察一致。',
@@ -440,9 +444,10 @@ th{color:var(--muted);font-weight:500;font-size:13px}
    {s:'Select-String 命令又被连续粘贴多遍，出现 >> 提示符',c:'同一条命令粘贴了几次连成一行，且缺结尾引号',f:'Ctrl+C 退出；每条命令只复制一次、只粘贴一次',st:'doing'},
    {s:'(旧)大单实验结果里仍然是 BUY 1，Quantity(1)，不是 1000',c:'order_strategy.py 没有真正改成 make_qty(1000)（可能没保存，或存到了别的文件夹/变成 .txt）',f:'用 Select-String order_strategy.py -Pattern "make_qty" 检查当前数值，再在例子文件夹里重新用 notepad 修改并保存',st:'doing'},
    {s:'大单实验仍显示 BUY 1（已解决）',c:'order_strategy.py 没有真正改成 make_qty(1000)',f:'重新在例子文件夹里用 notepad 保存；输出变成 BUY 1_000，成交 52+948',st:'done'},
+   {s:'买 100000 手时 Traceback：ValueError invalid value greater than MONEY_MAX 9_223_372_036.0, was 13_840_923_975.0',c:'计算手续费时要算名义金额（手数×价格×合约乘数 125000），超过了 Money 的上限；一开始我猜成保证金不足，是错的',f:'把数量降到 10000 手（名义约 13.8 亿美元，低于上限）；以后先估算名义金额再选手数',st:'doing'},
    {s:'fx_ema_cross_audusd_ticks.py 可能找不到测试数据',c:'推测：源码里 TEST_DATA_DIR 指向包目录旁的 tests/test_data，pip 安装版大概率没有这个目录（只读源码判断，未实际运行）',f:'先用自带数据的 example_01；之后要用 FillModel 时再处理数据路径',st:'todo'}
   ];
-  var logs=S.get('logs6',null); if(!logs||!logs.length)logs=seed.slice();
+  var logs=S.get('logs7',null); if(!logs||!logs.length)logs=seed.slice();
   var stName={todo:'待处理',doing:'处理中',done:'已解决'};
   function renderLog(){
     var h=''; logs.forEach(function(l,i){
@@ -453,16 +458,16 @@ th{color:var(--muted);font-weight:500;font-size:13px}
     document.getElementById('loglist').innerHTML=h;
   }
   document.getElementById('loglist').addEventListener('change',function(e){
-    var i=e.target.dataset.st; if(i==null)return; logs[+i].st=e.target.value; S.set('logs6',logs); renderLog();
+    var i=e.target.dataset.st; if(i==null)return; logs[+i].st=e.target.value; S.set('logs7',logs); renderLog();
   });
   document.getElementById('loglist').addEventListener('click',function(e){
-    var b=e.target.closest('[data-del]'); if(!b)return; logs.splice(+b.dataset.del,1); S.set('logs6',logs); renderLog();
+    var b=e.target.closest('[data-del]'); if(!b)return; logs.splice(+b.dataset.del,1); S.set('logs7',logs); renderLog();
   });
   document.getElementById('logform').addEventListener('submit',function(e){
     e.preventDefault();
     var s=document.getElementById('f_sym').value.trim(); if(!s)return;
     logs.push({s:s,c:document.getElementById('f_cause').value.trim()||'待查',f:document.getElementById('f_fix').value.trim()||'待定',st:document.getElementById('f_st').value});
-    S.set('logs6',logs); ['f_sym','f_cause','f_fix'].forEach(function(id){document.getElementById(id).value=''}); renderLog();
+    S.set('logs7',logs); ['f_sym','f_cause','f_fix'].forEach(function(id){document.getElementById(id).value=''}); renderLog();
   });
   document.getElementById('copyLog').addEventListener('click',function(){
     var md='# debug-log\n\n'+logs.map(function(l,i){return '## '+(i+1)+'. '+l.s+'\n- 状态：'+stName[l.st]+'\n- 原因：'+l.c+'\n- 解决：'+l.f+'\n'}).join('\n');

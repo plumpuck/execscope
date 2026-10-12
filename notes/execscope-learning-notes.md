@@ -26,7 +26,7 @@
 - [x] 对照 run_example.py 7 步读懂输出；peek_bar.py 实验：表格行 → Bar（价格统一 5 位小数、带品种和周期、时间为纳秒整数）
 - [x] 第一笔订单：OrderStrategy 在第一根 K 线买 1 手 → Total orders 1，Total positions 1，成交价 1.10780（等于该 K 线收盘价），commission 0，TAKER
 - [x] 大单实验：买 1000 手（第一根 K 线成交量 205）→ 1 个订单、2 笔成交：52 手@1.10780 + 948 手@1.10785，手续费 0，平均价 1.1078474，约 0.43 基点；没有被成交量 205 限制
-- [ ] 放大实验：买 100000 手，验证“默认滑点只有 1 个最小价位”的推测 —— 第一次运行：先成交 52 手@1.10780，随后出现 Traceback（output5.txt 第 248 行），原因待查，需要看 Traceback 全文
+- [ ] 放大实验：买 10000 手，验证“默认滑点只有 1 个最小价位”的推测 —— 第一次运行 100000 手：先成交 52 手@1.10780，随后 ValueError（名义金额 13,840,923,975 超过 Money 上限 9,223,372,036），不是保证金问题；改用 10000 手重做
 - [ ] 建 `debug-log.md`
 
 ## 每次新开 PowerShell 的固定动作
@@ -46,6 +46,7 @@
 - 回测 7 步（大白话）：像办一场模拟比赛。1 建引擎＝搭场地；2 add_venue＝开模拟交易所并给账户放 100 万美元（NETTING＝同品种买卖合并成净仓位，杠杆 1＝不借钱）；3 add_instrument＝选品种（2024 年 3 月到期欧元兑美元期货）；4 加数据（4a 读 CSV、4b 整理表格、4c 声明 K 线类型、4d Wrangler 转成 Bar、4e add_data）；5 add_strategy＝请策略上场；6 engine.run＝按时间顺序播放数据；7 dispose＝收场。ExecScope 主要改第 4、5 步，成交模型在第 2 步附近加。
 - 订单的一生：submit_order → OrderSubmitted → OrderMatchingEngine 撮合 → OrderFilled（含 last_qty、last_px、commission、liquidity_side=TAKER）。
 - 大单默认成交（观察+源码）：买 1000 手，K 线成交量 205 → 52 手@1.10780 + 948 手@1.10785。源码（develop_v1，matching_engine/engine.rs）：BarTickSizes::from_volume 把成交量分成 开/高/低 各 205/4=51、收 205-153=52；用完 L1 量后，“slip remainder by a single price increment”，剩余部分按最后成交价加 1 个最小价位成交。推测：订单再大也只多滑 1 个价位（待放大实验验证）。
+- 合约乘数与名义金额：名义金额 = 手数 × 价格 × 合约乘数。本例欧元期货乘数 125,000（由报错数据反推）：1 手约 13.8 万美元，1000 手约 1.38 亿美元，100000 手约 138 亿美元，超过 Money 上限约 92.2 亿会抛 ValueError。
 - 默认成交是乐观的：买 1 手按 K 线价全部成交、滑点 0、手续费 0；ExecScope 要检验大单下这是否低估成本。
 - BarDataWrangler：把 pandas 表格的每一行翻译成引擎认识的 Bar 对象（带品种、价格精度、纳秒时间戳）。引擎只处理自己的数据类型，所以不能直接收表格。类比：成绩单要先录入学籍系统规定的格式。
 - 父单/子单、TWAP/VWAP/POV、到达价、滑点、实施缺口（IS，基点）、成交模型、延迟模型、L1/L2/L3、队列位置、MessageBus、随机种子、LGPL-3.0：详见交互版笔记页的概念页。
@@ -75,6 +76,7 @@
 | 14 | Select-String 又被连续粘贴，出现 >> | 命令连成一行、缺结尾引号 | Ctrl+C，只粘贴一次 | 处理中 |
 | 15 | 大单实验输出仍是 BUY 1、Quantity(1) | order_strategy.py 没有真正改成 make_qty(1000)（可能没保存或存错位置） | 用 Select-String 检查 make_qty 的数值，再在例子文件夹里重新修改保存 | 处理中 |
 | 15 已解决 | 大单实验仍是 BUY 1 | 文件没改成功 | 重新保存后 BUY 1_000，成交 52+948 | 已解决 |
+| 16 | 买 100000 手时 ValueError: invalid value greater than MONEY_MAX | 算手续费时的名义金额 13,840,923,975 超过 Money 上限 9,223,372,036（我先猜成保证金不足，猜错） | 数量降到 10000 手；以后先估算名义金额 | 处理中 |
 | 7 | fx_ema_cross 例子可能找不到测试数据 | 推测：TEST_DATA_DIR 指向包目录旁 tests/test_data（只读源码判断，未运行） | 先用 example_01 | 待处理 |
 
 ## 决定记录
