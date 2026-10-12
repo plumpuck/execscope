@@ -1,0 +1,467 @@
+<title>ExecScope 学习笔记</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@700&display=swap">
+<style>
+/* Layout: 单栏笔记本。顶部标题+总进度，粘性标签栏切换五个分区，所有内容默认可见。 */
+:root{
+  --bg:#F4F6F3; --surface:#FFFFFF; --ink:#17201D; --muted:#55645E; --line:#D5DCD7;
+  --accent:#0E6B5F; --accent-soft:#DDEFEA; --accent-ink:#FFFFFF;
+  --warn:#8F4F08; --warn-soft:#F6E7D2; --bad:#A3342B; --bad-soft:#F5DEDB; --ok:#2A7048; --ok-soft:#DCEFE3;
+  --code-bg:#EBEFEC;
+  --display:"Noto Serif SC","Songti SC","SimSun",serif;
+  --body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101615; --surface:#18201E; --ink:#E6EDEA; --muted:#9AA9A3; --line:#2C3834;
+    --accent:#4FC3AE; --accent-soft:#17332E; --accent-ink:#0C1412;
+    --warn:#E0A458; --warn-soft:#35291A; --bad:#E87F74; --bad-soft:#3A1F1C; --ok:#6CC38F; --ok-soft:#1B3326;
+    --code-bg:#202B28; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101615; --surface:#18201E; --ink:#E6EDEA; --muted:#9AA9A3; --line:#2C3834;
+  --accent:#4FC3AE; --accent-soft:#17332E; --accent-ink:#0C1412;
+  --warn:#E0A458; --warn-soft:#35291A; --bad:#E87F74; --bad-soft:#3A1F1C; --ok:#6CC38F; --ok-soft:#1B3326;
+  --code-bg:#202B28; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;padding-inline:16px;padding-block:24px 56px}
+.wrap{max-width:860px;margin-inline:auto}
+h1{font-family:var(--display);font-size:clamp(26px,5vw,34px);line-height:1.25;margin:0 0 6px;text-wrap:balance}
+h2{font-size:19px;margin:0 0 10px;text-wrap:balance}
+h3{font-size:15px;margin:0 0 4px}
+p{margin:0 0 10px}
+.sub{color:var(--muted);margin:0 0 16px;max-width:65ch}
+code,.mono{font-family:var(--mono);font-size:.88em}
+code{background:var(--code-bg);padding:1px 6px;border-radius:4px}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.top{display:flex;flex-direction:column;gap:12px;margin-bottom:12px}
+.meter{display:flex;align-items:center;gap:12px}
+.bar{flex:1;height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+.meter b{font-variant-numeric:tabular-nums;min-width:4.5em;text-align:right}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:4px;overflow-x:auto;padding-block:8px;border-bottom:1px solid var(--line);margin-bottom:20px}
+nav.tabs button{font:inherit;color:var(--muted);background:none;border:0;border-bottom:2px solid transparent;padding:6px 12px;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:700}
+section.panel{display:flex;flex-direction:column;gap:20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0}
+.callout{background:var(--accent-soft);border-radius:8px;padding:16px;min-width:0}
+.callout h2{margin-bottom:6px}
+.cmd{display:flex;gap:8px;align-items:flex-start;margin-top:8px}
+.cmd pre{flex:1;min-width:0;margin:0;background:var(--code-bg);border-radius:6px;padding:8px 10px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.5}
+button.btn{font:inherit;font-size:13px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer;white-space:nowrap}
+button.btn:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.group h3{color:var(--muted);font-size:13px;letter-spacing:.06em;margin-bottom:8px}
+.item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0}
+.item input{margin-top:6px;width:18px;height:18px;accent-color:var(--accent);flex:none}
+.item label{flex:1;min-width:0;cursor:pointer}
+.item small{display:block;color:var(--muted);font-size:13px}
+.item input:checked+label span.t{text-decoration:line-through;color:var(--muted)}
+.chip{display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;margin-left:6px;vertical-align:1px}
+.chip.todo{background:var(--warn-soft);color:var(--warn)}
+.chip.doing{background:var(--accent-soft);color:var(--accent)}
+.chip.done{background:var(--ok-soft);color:var(--ok)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.search{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+details.concept{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:0 16px}
+details.concept[open]{padding-bottom:12px}
+details.concept summary{cursor:pointer;padding:12px 0;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:12px}
+details.concept summary::-webkit-details-marker{display:none}
+details.concept summary span.tag{font-weight:400;font-size:12px;color:var(--muted);white-space:nowrap}
+.concept dl{margin:0;display:grid;grid-template-columns:5.5em 1fr;gap:6px 12px}
+.concept dt{color:var(--muted);font-size:13px;padding-top:2px}
+.concept dd{margin:0;min-width:0}
+.list{display:flex;flex-direction:column;gap:10px}
+textarea,input[type=text],select{font:inherit;width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+textarea{min-height:76px;resize:vertical}
+.ans{margin-top:10px;padding:12px;background:var(--accent-soft);border-radius:6px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.log{display:grid;gap:8px;grid-template-columns:5.5em 1fr;font-size:14px}
+.log dt{color:var(--muted)}
+.log dd{margin:0;min-width:0}
+.logtop{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.grid2{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-top:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:500;font-size:13px}
+.scroll{overflow-x:auto}
+.theme{align-self:flex-start}
+.note{font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.bar>i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>ExecScope 学习笔记</h1>
+    <p class="sub">目标：两周内做出一个能写进简历、面试讲得清楚的项目。ExecScope 模拟一笔大额买入，拆成很多小单，算出实际多花了多少钱，再检验常用的模拟设置会不会把这个成本算少。底层用现成的交易回测引擎 NautilusTrader，我们在它上面搭。</p>
+    <div class="meter"><div class="bar" aria-hidden="true"><i id="barfill"></i></div><b id="pct">0%</b></div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="笔记分区">
+    <button role="tab" data-tab="progress" aria-selected="true">进度</button>
+    <button role="tab" data-tab="concepts" aria-selected="false">概念</button>
+    <button role="tab" data-tab="quiz" aria-selected="false">小测验</button>
+    <button role="tab" data-tab="log" aria-selected="false">踩坑日志</button>
+    <button role="tab" data-tab="material" aria-selected="false">素材</button>
+  </nav>
+
+  <!-- 进度 -->
+  <section class="panel" id="tab-progress">
+    <div class="callout">
+      <h2>现在要做的一步：大单实验</h2>
+      <p>第一笔订单已成交（买 1 手，价格 1.10780，手续费 0，滑点 0）。下一步把数量改成 1000 手，而第一根 K 线的成交量只有 205。先猜：会全部成交吗？价格会变吗？再运行验证。具体步骤见聊天。</p>
+      <p class="note" style="margin-top:10px">新开 PowerShell 窗口时要先运行 <code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</code>，再运行 <code>.\.venv\Scripts\Activate.ps1</code>，看到 (.venv) 再继续。命令一条一条粘贴，不要连成一行。</p>
+    </div>
+    <div class="card" id="checklist"></div>
+    <div class="row"><button class="btn" id="resetProgress">重置勾选</button><span class="note">勾选状态只保存在你当前浏览器里。</span></div>
+  </section>
+
+  <!-- 概念 -->
+  <section class="panel" id="tab-concepts" hidden>
+    <input class="search" id="q" type="text" placeholder="搜索概念，例如：虚拟环境、滑点、TWAP" aria-label="搜索概念">
+    <div class="list" id="concepts"></div>
+    <p class="note" id="noresult" hidden>没有匹配的概念。</p>
+  </section>
+
+  <!-- 小测验 -->
+  <section class="panel" id="tab-quiz" hidden>
+    <p class="sub">先用自己的话写，写完再点“显示参考答案”对照。答案会保存在这个浏览器里。</p>
+    <div class="list" id="quizlist"></div>
+  </section>
+
+  <!-- 日志 -->
+  <section class="panel" id="tab-log" hidden>
+    <p class="sub">面试官常问“你遇到过最难的问题是什么”。每个坑记下现象、原因、解决办法，就是现成的回答。原因里写“推测”的是我没有证据确认的。</p>
+    <div class="list" id="loglist"></div>
+    <form class="card" id="logform" autocomplete="off">
+      <h2>新增一条</h2>
+      <div class="list">
+        <div><label for="f_sym">现象（屏幕上看到了什么）</label><input type="text" id="f_sym"></div>
+        <div><label for="f_cause">原因</label><input type="text" id="f_cause"></div>
+        <div><label for="f_fix">解决办法</label><input type="text" id="f_fix"></div>
+        <div><label for="f_st">状态</label><select id="f_st"><option value="todo">待处理</option><option value="doing">处理中</option><option value="done">已解决</option></select></div>
+        <div class="row"><button class="btn primary" type="submit">添加</button><button class="btn" type="button" id="copyLog">复制为 Markdown</button><span class="note" id="copyMsg" role="status"></span></div>
+      </div>
+    </form>
+  </section>
+
+  <!-- 素材 -->
+  <section class="panel" id="tab-material" hidden>
+    <div class="card">
+      <h2>项目一句话</h2>
+      <p>ExecScope 是基于 NautilusTrader 的执行质量分析（TCA）和回测保真度工作台，用来检验默认的成交与延迟假设会不会低估执行算法的成本。</p>
+      <h2>动机的讲法（面试用）</h2>
+      <p>NautilusTrader 文档写明默认成交模型下，被触及的限价单一律视为可成交，且没有滑点；队列位置追踪存在但默认关闭。所以回测里的执行成本可能偏低。我做了一个工具把成本量化出来，并检验这些设置对结论的影响有多大。</p>
+      <p class="note">“偏低多少”目前没有数字，必须由你的实验给出，不能编。</p>
+    </div>
+    <div class="card scroll">
+      <h2>四个已核实的事实</h2>
+      <table>
+        <thead><tr><th>事实</th><th>出处</th></tr></thead>
+        <tbody>
+          <tr><td>默认成交模型 prob_fill_on_limit=1.0、prob_slippage=0.0</td><td>仓库 docs/concepts/backtesting/fill-models.md</td></tr>
+          <tr><td>延迟模型目前只有固定延迟 StaticLatencyModel</td><td>仓库 docs/concepts/behavioral_models.md</td></tr>
+          <tr><td>队列位置需手动设置 queue_position=True 且 trade_execution=True</td><td>仓库 docs/concepts/backtesting/trade-execution.md</td></tr>
+          <tr><td>PyPI 上的最新稳定版是 1.231.0（2026-08-02）；develop 分支是 v2 发布候选</td><td><a href="https://pypi.org/project/nautilus-trader/" target="_blank" rel="noopener">PyPI 页面</a>、仓库 version.json</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h2>简历五行模板</h2>
+      <p class="note">方括号处必须换成你真实跑出来的数字，没有就删掉整行。</p>
+      <div class="cmd"><pre id="resume">- Built ExecScope, a TCA and backtest-fidelity workbench on NautilusTrader, to test whether default fill and latency assumptions understate the cost of TWAP/[VWAP] parent orders.
+- Implemented TWAP and a custom [VWAP/POV] execution algorithm plus a TCA engine (arrival slippage, implementation shortfall, slippage vs interval VWAP), with unit tests and seed-deterministic runs.
+- Ran [N] backtests sweeping fill model x latency x book level x order size; found [measured result].
+- Wrote a Python (numba) limit-order-book replay simulator with queue-position estimation ([X events/s]) and cross-checked fills against Nautilus on the same event stream ([N]% agreement).
+- Served runs through FastAPI + Postgres (Docker Compose) and added an LLM trade explainer with a numeric-grounding verifier ([0] ungrounded numbers on a [20]-case eval).</pre><button class="btn" data-copy="resume">复制</button></div>
+    </div>
+    <div class="card">
+      <h2>项目笔记怎么管（当前决定）</h2>
+      <p>先用最简单的办法：项目文件夹里放一个 notes 目录，只放三个文件：<code>learning-notes.md</code>（概念与结论）、<code>debug-log.md</code>（踩坑）、<code>decisions.md</code>（做过的决定和原因）。聊天里有价值的内容，我会同步更新到这个笔记页和项目里的 markdown。</p>
+      <p>你提到的 QMD（tobi/qmd）我读过它的 README：要求 Node.js 22 以上，首次使用会自动下载三个本地模型，许可证 MIT。它适合笔记多了以后找不回的情况。现在笔记还很少，装它要先装 Node，会增加你的负担，所以先不装。到第 7 天笔记超过十几篇、搜索开始吃力时再用它。</p>
+      <p class="note">过早装工具是新手最常见的拖延来源。</p>
+    </div>
+    <div class="card">
+      <h2>还没验证的部分</h2>
+      <p>NautilusTrader 在你电脑上的实际运行；它的 stars 和近期活跃度；向量化回测器与券商 TCA 产品的能力；Perold 与 Almgren–Chriss 的原文；类似开源工作是否已经存在（确认前简历不要写“首个”）。</p>
+      <p><a href="https://claude.ai/artifact/KSeuRgRWF2iSbehqdbxP63" target="_blank" rel="noopener">完整规划文档（两周日程、实验设计、读码路线）</a></p>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  var S={get:function(k,d){try{var v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+         set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+
+  /* 标签页 */
+  var tabs=[].slice.call(document.querySelectorAll('nav.tabs button'));
+  function showTab(name){
+    tabs.forEach(function(b){b.setAttribute('aria-selected',b.dataset.tab===name?'true':'false')});
+    ['progress','concepts','quiz','log','material'].forEach(function(n){document.getElementById('tab-'+n).hidden=(n!==name)});
+    S.set('tab',name);
+  }
+  tabs.forEach(function(b){b.addEventListener('click',function(){showTab(b.dataset.tab)})});
+  var t0=S.get('tab','progress'); if(['progress','concepts','quiz','log','material'].indexOf(t0)<0)t0='progress'; showTab(t0);
+
+  /* 复制 */
+  function copyFrom(id,btn){
+    var el=document.getElementById(id), txt=el.textContent, old=btn.textContent;
+    function ok(){btn.textContent='已复制';setTimeout(function(){btn.textContent=old},1200)}
+    function fb(){var r=document.createRange();r.selectNodeContents(el);var s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='已选中，请按 Ctrl+C';setTimeout(function(){btn.textContent=old},2000)}
+    try{navigator.clipboard.writeText(txt).then(ok,fb)}catch(e){fb()}
+  }
+  document.addEventListener('click',function(e){var b=e.target.closest('[data-copy]');if(b)copyFrom(b.dataset.copy,b)});
+
+  /* 进度清单 */
+  var groups=[
+   {t:'阶段 0 · 规划',items:[
+     {id:'p1',x:1,t:'用鼠鼠实习工具筛选项目',n:'候选：NautilusTrader（主）、CppTrader、hftbacktest'},
+     {id:'p2',x:1,t:'确定项目方向 ExecScope（Python 为主）'},
+     {id:'p3',x:1,t:'完成规划文档：动机、业界方案、设计、实验、读码路线、日程'}]},
+   {t:'阶段 1 · 搭环境',items:[
+     {id:'e1',x:1,t:'安装 NautilusTrader 1.231.0',n:'已在虚拟环境里重装，打印 1.231.0'},
+     {id:'e2',x:1,t:'查看当前 Python 和已装的包',n:'运行上面三条命令'},
+     {id:'e3',x:1,t:'清理公共环境里多装的包'},
+     {id:'e4',x:1,t:'建虚拟环境并激活',n:'命令行最前面出现 (.venv)'},
+     {id:'e5',x:1,t:'在虚拟环境里重装并确认版本输出 1.231.0'},
+     {id:'e6',t:'建 debug-log.md，记下已经遇到的坑'}]},
+   {t:'阶段 2 · 跑通官方例子',items:[
+     {id:'r1',x:1,t:'下载官方源码里的例子',n:'已下载 develop_v1 分支到 nautilus_src'},
+     {id:'r2',x:1,t:'跑通 example_01 最小回测',n:'已跑通：9 根 K 线，0 单'},
+     {id:'r3',x:1,t:'对照脚本 7 个步骤看懂输出',n:'peek_bar 实验已做：Wrangler 把表格行翻译成 Bar'},
+     {id:'r5',x:1,t:'下出第一笔订单',n:'买 1 手：Total orders 1，Total positions 1，成交价 1.10780'},
+     {id:'r6',t:'大单实验：买 1000 手（第一根 K 线成交量只有 205）',n:'先猜结果再运行'},
+     {id:'r4',t:'读 fx_ema_cross 例子里的 FillModel（成交模型）部分',n:'它读取测试数据目录，pip 安装版大概率找不到数据，要先处理'}]},
+   {t:'阶段 3 · 做自己的部分（第 3 天起）',items:[
+     {id:'b1',t:'M0 数据与父单场景'},
+     {id:'b2',t:'M1 TWAP 跑通'},
+     {id:'b3',t:'M2 TCA 指标和单元测试'}]}
+  ];
+  var all=[]; groups.forEach(function(g){g.items.forEach(function(i){all.push(i)})});
+  var stored=S.get('checks3',null);
+  var state={}; all.forEach(function(i){state[i.id]=stored&&(i.id in stored)?!!stored[i.id]:!!i.x});
+  function renderChecks(){
+    var h=''; groups.forEach(function(g){
+      h+='<div class="group"><h3>'+esc(g.t)+'</h3>';
+      g.items.forEach(function(i){
+        h+='<div class="item"><input type="checkbox" id="ck_'+i.id+'" data-id="'+i.id+'"'+(state[i.id]?' checked':'')+'><label for="ck_'+i.id+'"><span class="t">'+esc(i.t)+'</span>'+(i.n?'<small>'+esc(i.n)+'</small>':'')+'</label></div>';
+      }); h+='</div>';
+    });
+    document.getElementById('checklist').innerHTML=h; meter();
+  }
+  function meter(){
+    var n=all.filter(function(i){return state[i.id]}).length, p=Math.round(n*100/all.length);
+    document.getElementById('barfill').style.width=p+'%';
+    document.getElementById('pct').textContent=n+' / '+all.length;
+  }
+  document.getElementById('checklist').addEventListener('change',function(e){
+    var id=e.target.dataset.id; if(!id)return; state[id]=e.target.checked; S.set('checks3',state); meter();
+  });
+  document.getElementById('resetProgress').addEventListener('click',function(){
+    all.forEach(function(i){state[i.id]=!!i.x}); S.set('checks3',state); renderChecks();
+  });
+  renderChecks();
+
+  /* 概念 */
+  var C=[
+   ['订单的一生（提交 → 成交）','Nautilus',
+    '下单后事件按顺序发生：OrderSubmitted（已提交）→ 撮合引擎处理 → OrderFilled（已成交）。',
+    '日志里依次出现：策略 submit_order → OrderSubmitted → OrderMatchingEngine 的 Applying fills → OrderFilled，里面有成交数量 last_qty、成交价 last_px、手续费 commission、流动性方向 liquidity_side=TAKER（主动吃单）。ExecScope 要做的，就是在这条链上观察大单被拆成小单后的每一笔成交。',
+    '“我通过订单事件流（提交、成交）重建每笔子单的成交价，来计算执行成本。”'],
+   ['默认成交是“乐观”的','回测',
+    'example_01 里买 1 手，不管市场深度，都按该 K 线价格立刻全部成交，滑点 0，手续费 0。',
+    '本次观察：成交价 1.10780 等于第一根 K 线收盘价，一次成交 1 手，commission=0.00 USD。与我之前核实的默认模型（prob_fill_on_limit=1.0、prob_slippage=0.0）一致。这正是 ExecScope 要检验的：如果买得很大，这种乐观假设会不会把成本算少。',
+    '“默认回测假设成交无冲击，我用 TCA 量化这个假设低估了多少成本。”'],
+   ['回测 7 步（大白话版）','Nautilus',
+    '把回测想成“办一场模拟比赛”：先搭场地，再备数据，请选手上场，开赛，最后收场。',
+    '1 建引擎＝搭场地；2 add_venue＝开一个模拟交易所并给账户放 100 万美元；3 add_instrument＝选要交易的品种；4 加数据＝把历史行情准备好交给引擎（读 CSV → 整理 → 转成 Bar → add_data）；5 add_strategy＝请策略这位“选手”上场；6 engine.run＝开赛，按时间顺序一根根播放数据；7 dispose＝收场，释放资源。ExecScope 主要改第 4、5 步，成交模型在第 2 步附近加。',
+    '“我沿用 Nautilus 的标准回测流程，只替换数据、策略和成交模型三处。”'],
+   ['BarDataWrangler（数据转换器）','Nautilus',
+    '把 pandas 表格里的每一行，翻译成引擎认识的 Bar 对象。',
+    'pandas 表格只有一堆数字，引擎不知道这是哪个品种、价格保留几位小数、时间精确到什么单位。Wrangler 按品种的规则把每行转成带品种、精度、纳秒时间戳的 Bar。引擎只处理自己的数据类型，所以不能直接收表格。类比：Excel 里的一行成绩，要先录入成学籍系统规定的格式，系统才认。',
+    '“数据进入引擎前统一转换成引擎原生类型，保证精度和时间戳一致。”'],
+   ['策略生命周期（on_start / on_bar / on_stop）','Nautilus',
+    '策略是一个类，引擎在固定时刻调用它的方法：启动时 on_start，每来一根 K 线调用一次 on_bar，结束时 on_stop。',
+    'DemoStrategy 在 on_start 里 subscribe_bars 订阅数据，on_bar 里计数，on_stop 里打印总数。不订阅就收不到数据；不调用下单方法就没有订单（所以 Total orders: 0）。',
+    '“我的执行算法挂在事件回调上，按引擎时钟驱动，而不是自己写循环。”'],
+   ['回测时间 vs 真实时间','Nautilus',
+    '回测里的时间是数据里的时间，不是你电脑的时钟。',
+    '日志里 Total bars processed 那行的时间是 2024-01-01T23:09（数据时间），而文件开头的日志是 2026-10-07（你跑的真实时间）。回测引擎按数据时间向前推进，所以结果可重复。',
+    '“回测用模拟时钟，给定同一份数据和随机种子，结果可复现。”'],
+   ['nan（算不出的统计量）','回测',
+    '夏普比率、平均收益等指标需要已平掉的交易才能算，没有交易时显示 nan。',
+    'example_01 没有下单，所以 Returns Statistics 全是 nan。这是“没有数据可算”，不是出错。',
+    '“看到 nan 我先检查有没有成交，而不是先怀疑指标代码。”'],
+   ['虚拟环境（venv）','环境',
+    '给一个项目单独准备的“小房间”，里面装的包只给它用。',
+    '所有项目共用一个 Python 时，装新包会顶掉旧版本，别的软件就可能坏。你这次出现的 s3fs、streamlit 冲突警告就是例子。',
+    '“我为每个项目建独立虚拟环境，并锁定依赖版本，保证别人能复现我的结果。”'],
+   ['pip 与 ==版本号','环境',
+    'pip 是 Python 的装包命令。写 ==1.231.0 就是指定必须装这个版本。',
+    '不写版本会装最新版，时间一长环境不同、代码可能跑不了。',
+    '“实验结果都记录了引擎版本，因为不同版本的行为可能不一样。”'],
+   ['PATH 与 python 命令','环境',
+    '输入 python 时，电脑按一份路径清单找程序。清单里可能先找到 Windows 的占位入口，而不是真正的 Python。',
+    '你的 python --version 没有任何输出，我推测就是这个原因，但还没有确认。用完整路径运行可以绕开。',
+    '“遇到命令找不到或行为异常时，我先确认命令实际指向哪个可执行文件。”'],
+   ['用户目录安装','环境',
+    'pip 提示 Defaulting to user installation，意思是装到了你账号自己的目录，而不是项目的虚拟环境里。',
+    '这些包会盖住 Anaconda 自带的同名包，所以才出现冲突警告。',
+    '“依赖冲突我会先定位包装在哪里，再清理或隔离。”'],
+   ['依赖冲突','环境',
+    '两个软件对同一个包要求不同版本，装一个会破坏另一个。',
+    '本次：pandas 升到 3.0.6，fsspec 升到 2026.2.0，和 streamlit、s3fs 的要求不符。',
+    '“用虚拟环境隔离，避免全局依赖互相覆盖。”'],
+   ['PowerShell 执行策略','环境',
+    'Windows 默认不允许运行脚本文件（如 Activate.ps1）。Set-ExecutionPolicy -Scope Process 只放行当前窗口，关掉窗口就恢复。',
+    '比改系统设置安全，也不留后患。每个新窗口都要重新放行。',
+    '“遇到权限限制，我选择作用范围最小的放行方式。”'],
+   ['工作目录与相对路径','环境',
+    '命令行当前所在的文件夹叫工作目录。脚本里写 "6EH4.XCME_1min_bars.csv" 这种相对路径，只在脚本所在文件夹里运行才找得到。',
+    '所以运行 example_01 前要先 cd 进它的文件夹。',
+    '“路径问题我先确认工作目录。”'],
+   ['git clone 与分支','工程',
+    'clone 是把 GitHub 上的代码完整下载到本地。--branch develop_v1 指定下载 v1 版本的分支，保证例子和你装的 1.231.0 对得上。',
+    '版本不一致时，例子可能直接报错。',
+    '“我让示例代码的分支和依赖的版本保持一致。”'],
+   ['回测的 7 个步骤','引擎',
+    '建引擎、加交易所、加品种、加数据、加策略、运行、释放资源。官方例子的注释就是按这个顺序写的。',
+    '我们的 M0 对应“加数据”，M1 对应“加策略/算法”，M3 对应反复“运行”并改变设置。',
+    '“我先理解回测骨架，再在每一步上做扩展。”'],
+   ['NautilusTrader','引擎',
+    '开源的交易系统与回测引擎，核心用 Rust 写，用 Python 来控制。',
+    '同一套策略和执行算法代码，既能做回测，也能接实盘，所以适合研究“回测和实盘的差距”。',
+    '“我基于它的 ExecutionAlgorithm 接口写了执行算法，没有改它的源码。”'],
+   ['回测（backtest）','交易',
+    '用历史行情模拟一个交易方案，看当时会赚还是亏、成本是多少。',
+    '回测不会真实地和其他交易者互动，所以成交假设会影响结果。',
+    '“回测结果取决于成交假设，我把假设做成实验变量。”'],
+   ['父单与子单（spawn）','交易',
+    '客户下的一笔大单叫父单；执行算法把它拆成很多小单，叫子单。',
+    '一次买太多会推高价格，所以拆开慢慢买。',
+    '“算法把一笔父单拆成按时间分布的子单，我统计每个子单的成交。”'],
+   ['TWAP / VWAP / POV','交易',
+    'TWAP 按时间平均拆单；VWAP 跟着市场成交量的节奏拆；POV 固定占市场成交量的一个比例。',
+    'Nautilus 自带 TWAP，VWAP 和 POV 要自己写。',
+    '“我对比了不同拆单算法在同一段行情上的成本。”'],
+   ['到达价与滑点','交易',
+    '到达价是父单开始时的中间价。滑点是实际成交价和它的差，买入时成交更贵就是正滑点成本。',
+    '这是衡量“我多花了多少钱”的基准。',
+    '“以到达价为基准衡量实际成交的偏离，单位用基点。”'],
+   ['实施缺口（Implementation Shortfall）','交易',
+    '把到达价当作理想价，实际成交均价与它的差，用基点（万分之一）表示。买入时为正表示多花了钱。',
+    '本项目 TCA 的核心指标；未成交的部分另算机会成本。公式是简化版，读完原始论文后再细化。',
+    '“我实现了实施缺口，并用手算样例做了单元测试。”'],
+   ['成交模型（Fill Model）','引擎',
+    '决定回测里一张限价单“会不会成交、有没有滑点”的规则。默认是触及即成交、无滑点。',
+    '这是本项目要检验的假设之一。',
+    '“默认成交模型偏乐观，我扫描了几种更保守的设置。”'],
+   ['延迟模型（Latency Model）','引擎',
+    '模拟下单、改单、撤单到交易所之间的网络延迟。目前只有固定延迟，没有抖动。',
+    '真实市场里延迟会让你错过价格。',
+    '“我扫描了 0、1、10、50 毫秒的固定延迟对成本的影响。”'],
+   ['订单簿 L1 / L2 / L3','行情',
+    'L1 只有最优买卖价；L2 有多档价格和每档总量；L3 能看到每一张单。',
+    '层级越高越接近真实撮合，也越吃数据。',
+    '“我对比了 L1 与 L2 数据下的结论差异。”'],
+   ['队列位置','行情',
+    '同一价位上，先挂的单先成交。你的单排第几，决定能不能成交。',
+    '对被动挂单的成本影响很大。Nautilus 需手动打开，默认关闭。',
+    '“队列位置我做了开/关对比。”'],
+   ['消息总线（MessageBus）','引擎',
+    'Nautilus 内部各组件传递指令和事件的通道，相当于它的“路由”。',
+    '读码时用来追一笔订单从下单到成交走过哪些地方。',
+    '“我画过一笔订单的指令路由表。”'],
+   ['随机种子与确定性','工程',
+    '给带随机性的模型固定一个种子，同样输入就产生同样输出。',
+    '实验必须能复现，否则别人无法验证你的数字。',
+    '“同种子跑两次，成交序列哈希一致。”'],
+   ['LGPL-3.0','工程',
+    'NautilusTrader 的许可证。可以把它当库来使用，但不要把它的源码拷进自己的仓库。',
+    '简历里要写清“基于 NautilusTrader”。',
+    '“我的代码放在独立包里，只调用公开接口。”']
+  ];
+  function renderConcepts(filter){
+    var f=(filter||'').trim().toLowerCase(), h='', n=0;
+    C.forEach(function(c){
+      var hay=(c[0]+c[1]+c[2]+c[3]).toLowerCase();
+      if(f&&hay.indexOf(f)<0)return; n++;
+      h+='<details class="concept"><summary><span>'+esc(c[0])+'</span><span class="tag">'+esc(c[1])+'</span></summary><dl><dt>白话</dt><dd>'+esc(c[2])+'</dd><dt>为什么重要</dt><dd>'+esc(c[3])+'</dd><dt>面试说法</dt><dd>'+esc(c[4])+'</dd></dl></details>';
+    });
+    document.getElementById('concepts').innerHTML=h;
+    document.getElementById('noresult').hidden=n>0;
+  }
+  document.getElementById('q').addEventListener('input',function(e){renderConcepts(e.target.value)});
+  renderConcepts('');
+
+  /* 小测验 */
+  var Q=[
+   ['1. 虚拟环境是干什么的？不建的话会有什么麻烦？','它是给这个项目单独准备的“小房间”，里面装的软件只给这个项目用。不建的话，所有软件都挤在公共的 Python 里，装新东西可能把别的软件弄坏，比如你这次出现的 s3fs 和 streamlit 版本冲突警告。'],
+   ['2. pip install nautilus_trader==1.231.0 里的 ==1.231.0 起什么作用？','它规定必须装这个版本。不写的话 pip 会装最新版，以后换一台电脑或重装时版本不同，代码就可能跑不了，实验结果也没法复现。'],
+   ['3. 装好后，你在 debug-log.md 里记了什么？','记遇到的问题：现象、原因、解决办法。按目前的情况可以写：python --version 没有输出、虚拟环境没建成；pip 装到了用户目录而不是虚拟环境；装完出现 s3fs、streamlit 版本冲突警告。没遇到问题才写“无”。']
+  ];
+  var qa=S.get('quiz',{}); var qh='';
+  Q.forEach(function(q,i){
+    qh+='<div class="card"><h3>'+esc(q[0])+'</h3><textarea id="qa'+i+'" aria-label="我的回答"></textarea><div class="row" style="margin-top:8px"><button class="btn" data-ans="'+i+'">显示参考答案</button></div><div class="ans" id="ans'+i+'" hidden>'+esc(q[1])+'</div></div>';
+  });
+  document.getElementById('quizlist').innerHTML=qh;
+  Q.forEach(function(q,i){var t=document.getElementById('qa'+i); if(qa['q'+i])t.value=qa['q'+i];
+    t.addEventListener('input',function(){qa['q'+i]=t.value;S.set('quiz',qa)})});
+  document.getElementById('quizlist').addEventListener('click',function(e){
+    var b=e.target.closest('[data-ans]'); if(!b)return; var a=document.getElementById('ans'+b.dataset.ans);
+    a.hidden=!a.hidden; b.textContent=a.hidden?'显示参考答案':'隐藏参考答案';
+  });
+
+  /* 日志 */
+  var seed=[
+   {s:'python --version 没有输出；python -m venv .venv 之后找不到 Activate.ps1',c:'Get-Command python 显示它来自 C:\\Users\\HP\\AppData\\Local\\Microsoft\\Wi...（路径被截断，推测是 WindowsApps 占位入口）',f:'用 Anaconda 的完整路径 D:\\ProgramData\\anaconda3\\python.exe 建虚拟环境，激活后 python 才指向正确程序',st:'done'},
+   {s:'pip install 提示 Defaulting to user installation',c:'没有激活虚拟环境，包被装进了用户目录',f:'pip list --user 确认 10 个包后一次性卸载，在虚拟环境里重装',st:'done'},
+   {s:'安装后出现 s3fs、streamlit 的版本冲突警告',c:'pandas 升到 3.0.6、fsspec 升到 2026.2.0，覆盖了 Anaconda 里的版本',f:'卸载用户目录里多装的包，Anaconda 的 pandas 2.2.3、fsspec 2025.3.2 恢复',st:'done'},
+   {s:'python -c "import nautilus_trader; ..." 没有输出',c:'python 是占位入口，没有真正运行',f:'激活虚拟环境后重新运行，打印 1.231.0',st:'done'},
+   {s:'Activate.ps1 提示“在此系统上禁止运行脚本”',c:'Windows PowerShell 的执行策略拦截了激活脚本',f:'Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass（只对当前窗口有效），每个新窗口都要重做',st:'done'},
+   {s:'python --version 与 python -m pip install ... 连成一行，报 unknown option',c:'粘贴时两条命令没有换行',f:'命令一条一条粘贴，回车后再粘贴下一条',st:'done'},
+   {s:'Get-Content output.txt -Tail 40 连续粘贴了三遍，报“无法绑定参数 Tail”',c:'三条命令连成一行，-Tail 后面变成 40Get-Content...',f:'命令只粘贴一次，回车后再粘贴下一条',st:'done'},
+   {s:'output.txt 里出现红色 NativeCommandError，附带 Timestamp.utcnow is deprecated',c:'Python 的弃用提醒写到了错误输出，2>&1 重定向后 PowerShell 套上了错误格式；不是回测失败',f:'无需处理；判断成败看有没有 Traceback，以及末尾是否 DISPOSED / Closed message bus',st:'done'},
+   {s:'在错误的文件夹（C:\\Users\\HP）里运行了 notepad order_strategy.py',c:'没有先 cd 到例子文件夹，文件会建在当前文件夹',f:'先看提示符里的路径或运行 pwd，再执行命令；多出来的文件无害',st:'done'},
+   {s:'命令粘贴多遍，最后出现 >> 提示符，没有输出',c:'其中一遍缺了结尾引号，PowerShell 以为命令没写完，在等待继续输入',f:'按 Ctrl+C 退出，再把命令只粘贴一次',st:'done'},
+   {s:'日志里的中文显示成乱码（宸叉彁浜よ鍗?）',c:'Windows 把输出重定向到文件时的编码与 Python 的 UTF-8 不一致',f:'日志、print 里先用英文；不影响回测结果',st:'done'},
+   {s:'fx_ema_cross_audusd_ticks.py 可能找不到测试数据',c:'推测：源码里 TEST_DATA_DIR 指向包目录旁的 tests/test_data，pip 安装版大概率没有这个目录（只读源码判断，未实际运行）',f:'先用自带数据的 example_01；之后要用 FillModel 时再处理数据路径',st:'todo'}
+  ];
+  var logs=S.get('logs3',null); if(!logs||!logs.length)logs=seed.slice();
+  var stName={todo:'待处理',doing:'处理中',done:'已解决'};
+  function renderLog(){
+    var h=''; logs.forEach(function(l,i){
+      h+='<div class="card"><div class="logtop"><b>#'+(i+1)+'<span class="chip '+l.st+'">'+stName[l.st]+'</span></b><span class="row"><select data-st="'+i+'" aria-label="状态">'+
+        ['todo','doing','done'].map(function(k){return '<option value="'+k+'"'+(l.st===k?' selected':'')+'>'+stName[k]+'</option>'}).join('')+
+        '</select><button class="btn" data-del="'+i+'">删除</button></span></div><dl class="log" style="margin:0"><dt>现象</dt><dd>'+esc(l.s)+'</dd><dt>原因</dt><dd>'+esc(l.c)+'</dd><dt>解决</dt><dd>'+esc(l.f)+'</dd></dl></div>';
+    });
+    document.getElementById('loglist').innerHTML=h;
+  }
+  document.getElementById('loglist').addEventListener('change',function(e){
+    var i=e.target.dataset.st; if(i==null)return; logs[+i].st=e.target.value; S.set('logs3',logs); renderLog();
+  });
+  document.getElementById('loglist').addEventListener('click',function(e){
+    var b=e.target.closest('[data-del]'); if(!b)return; logs.splice(+b.dataset.del,1); S.set('logs3',logs); renderLog();
+  });
+  document.getElementById('logform').addEventListener('submit',function(e){
+    e.preventDefault();
+    var s=document.getElementById('f_sym').value.trim(); if(!s)return;
+    logs.push({s:s,c:document.getElementById('f_cause').value.trim()||'待查',f:document.getElementById('f_fix').value.trim()||'待定',st:document.getElementById('f_st').value});
+    S.set('logs3',logs); ['f_sym','f_cause','f_fix'].forEach(function(id){document.getElementById(id).value=''}); renderLog();
+  });
+  document.getElementById('copyLog').addEventListener('click',function(){
+    var md='# debug-log\n\n'+logs.map(function(l,i){return '## '+(i+1)+'. '+l.s+'\n- 状态：'+stName[l.st]+'\n- 原因：'+l.c+'\n- 解决：'+l.f+'\n'}).join('\n');
+    var m=document.getElementById('copyMsg');
+    function ok(){m.textContent='已复制，粘贴到 debug-log.md'}
+    function fb(){var ta=document.createElement('textarea');ta.value=md;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(e){m.textContent='复制失败，请手动选中文字'}document.body.removeChild(ta)}
+    try{navigator.clipboard.writeText(md).then(ok,fb)}catch(e){fb()}
+  });
+  renderLog();
+})();
+</script>
