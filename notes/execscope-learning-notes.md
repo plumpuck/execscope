@@ -1,6 +1,7 @@
 # ExecScope 学习笔记
 
 目标：两周内做出能写进简历的 ExecScope（基于 NautilusTrader 的执行质量 TCA + 回测保真度工作台，Python 为主）。
+项目总览（计划文档的浓缩版，附进度）：notes/execscope-overview.md
 交互版笔记页：https://claude.ai/artifact/3nP52MS5LTGQVAZHnShgbj　完整规划：https://claude.ai/artifact/KSeuRgRWF2iSbehqdbxP63
 
 ## 项目地图（每次交流开头都回顾一遍）

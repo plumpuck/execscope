@@ -16,6 +16,7 @@ models change the answer?
 - [ ] M0 parent-order scenario, M1 TWAP, M2 TCA metrics and unit tests
 
 ## Layout
+- `notes/execscope-overview.md` project overview (motivation, design M0–M6, experiments E1–E6, progress)
 - `notes/` plan, learning notes, debug log, interactive notes page (`execscope-notes.html`)
 - `src/` TCA helpers and their tests (pure Python)
 - `examples/` small scripts written while learning (they import files of the official example)

@@ -103,6 +103,7 @@ th{color:var(--muted);font-weight:500;font-size:13px}
 
   <nav class="tabs" role="tablist" aria-label="笔记分区">
     <button role="tab" data-tab="progress" aria-selected="true">进度</button>
+    <button role="tab" data-tab="overview" aria-selected="false">总览</button>
     <button role="tab" data-tab="concepts" aria-selected="false">概念</button>
     <button role="tab" data-tab="quiz" aria-selected="false">小测验</button>
     <button role="tab" data-tab="log" aria-selected="false">踩坑日志</button>
@@ -118,6 +119,97 @@ th{color:var(--muted);font-weight:500;font-size:13px}
     </div>
     <div class="card" id="checklist"></div>
     <div class="row"><button class="btn" id="resetProgress">重置勾选</button><span class="note">勾选状态只保存在你当前浏览器里。</span></div>
+  </section>
+
+  <!-- 总览 -->
+  <section class="panel" id="tab-overview" hidden>
+    <div class="card">
+      <h2>项目一句话</h2>
+      <p>ExecScope：让一笔大额“父单”交给执行算法拆成“子单”，在 NautilusTrader 回测里成交，输出交易成本分析（TCA），再检验“成交模型、延迟、数据层级”这些回测假设会把结论改变多少。目标是回答：<b>默认回测设置是否让大单的执行成本看起来比真实更便宜？</b></p>
+      <p class="note">原始完整计划文档（含 Sources）：<a href="https://claude.ai/artifact/KSeuRgRWF2iSbehqdbxP63" target="_blank" rel="noopener">ExecScope 实习项目规划</a>。这一页是它的浓缩版，并标出了我们做到哪里。</p>
+    </div>
+
+    <div class="card scroll">
+      <h2>四步闭环</h2>
+      <table>
+        <thead><tr><th>步骤</th><th>内容</th><th>现在的证据 / 状态</th></tr></thead>
+        <tbody>
+          <tr><td>① 动机</td><td>默认回测设置偏乐观：成交模型默认 prob_fill_on_limit=1.0、prob_slippage=0.0；L2/L3 下 liquidity_consumption 默认 False；延迟只有固定延迟 StaticLatencyModel；队列位置要手动打开。</td><td>官方文档为证；<b>我们自己的实验也看到了</b>：买 1 / 1000 / 10000 手，每手多付约 0 / 5.9 / 6.2 美元，基本等于 1 个最小价位。</td></tr>
+          <tr><td>② 业界方案</td><td>Nautilus（事件驱动、回测与实盘共用代码、有原生 TWAP，但没找到 arrival price / implementation shortfall 指标）；hftbacktest（高保真逐笔、队列位置、延迟，面向做市）；CppTrader（C++ 撮合组件，非研究工作流）；券商 TCA 产品和普通 Python 回测器（待调研）。</td><td>缺口：没发现把“执行算法回测 → TCA → 假设敏感性”串起来的开源工作流（仅是有限检索，简历里不要写“首个”）。</td></tr>
+          <tr><td>③ 设计</td><td>M0–M6 六个模块（见下表）。</td><td>M0、M2 已有雏形</td></tr>
+          <tr><td>④ 实验</td><td>E1–E6 六组实验（见下表）。</td><td>E2/E3 的先导实验已做</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card scroll">
+      <h2>TCA 基本概念</h2>
+      <table>
+        <thead><tr><th>概念</th><th>意思</th></tr></thead>
+        <tbody>
+          <tr><td>到达价 arrival price</td><td>父单到达交易台/执行系统那一刻的市场价（通常取买卖价中间价）。执行算法常用它做基准。</td></tr>
+          <tr><td>VWAP</td><td>一段时间内按成交量加权的平均价。</td></tr>
+          <tr><td>滑点 slippage</td><td>买单：成交价 − 基准价；卖单：基准价 − 成交价。正数是成本，负数是价格改善。</td></tr>
+          <tr><td>市场冲击 market impact</td><td>你的单子本身把价格推动了，消耗了流动性。</td></tr>
+          <tr><td>实施缺口 implementation shortfall</td><td>从决策到完成的总成本，包括延迟成本、滑点、冲击、费用、未成交的机会成本；通常以决策价为基准。报告里一定要写明用的是哪个基准（到达价 / VWAP / 决策价 / 收盘价 / 区间 VWAP）。</td></tr>
+          <tr><td>敏感性分析</td><td>改动回测假设（成交模型、延迟、数据层级），看结论变不变。</td></tr>
+        </tbody>
+      </table>
+      <p class="note">代码里的公式：滑点基点 = 符号 × (平均成交价 − 到达价) ÷ 到达价 × 10000，买单符号 +1，卖单 −1。</p>
+    </div>
+
+    <div class="card scroll">
+      <h2>六个模块（设计）</h2>
+      <table>
+        <thead><tr><th>模块</th><th>做什么</th><th>解决什么</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td>M0 数据与场景</td><td>统一事件流 + 父单场景（方向、数量、起止时间）</td><td>回测引擎和参考模拟器吃同一份数据</td><td>雏形：官方例子里 9 根 1 分钟 K 线 + 1 个品种</td></tr>
+          <tr><td>M1 执行算法</td><td>原生 TWAP + 自写 VWAP/POV（继承 ExecutionAlgorithm）</td><td>有“服务客户大单”的对象</td><td>已写纯 Python 的拆单函数 twap_schedule；接入回测待做</td></tr>
+          <tr><td>M2 TCA 引擎</td><td>到达价滑点、相对 VWAP、实施缺口、成交率</td><td>把成交记录变成客户听得懂的指标</td><td>已有 average_price / slippage_bps / cost_usd，4 个测试通过；VWAP、实施缺口待做</td></tr>
+          <tr><td>M3 实验批跑</td><td>算法 × 成交模型 × 延迟 × 队列位置 × 父单大小 × 随机种子，结果入库</td><td>把“假设对结论的影响”变成可查询的表</td><td>未开始</td></tr>
+          <tr><td>M4 订单簿参考模拟器</td><td>Python（numba）限价订单簿 + 队列位置；C++ 选做</td><td>给 Nautilus 结果一个独立的第二意见</td><td>未开始</td></tr>
+          <tr><td>M5 后端与看板</td><td>FastAPI + Postgres/SQLite + Docker Compose + 图表</td><td>交易员和风控能看、能比较</td><td>未开始</td></tr>
+          <tr><td>M6 AI 解读器</td><td>结构化 TCA → 客户说明；数字校验器保证每个数字来自 TCA</td><td>避免大模型编数字</td><td>未开始</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card scroll">
+      <h2>六组实验（验证）</h2>
+      <p class="note">判定标准先写下来，不预设结果；假设成立就报告“低估了多少 bps”，不成立就报告“默认足够”，都算完成闭环。所有数字要带引擎版本、数据文件、随机种子。</p>
+      <table>
+        <thead><tr><th>实验</th><th>问题</th><th>判定标准</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td>E1 正确性</td><td>算法和 TCA 算对了吗</td><td>分片数之和 = 父单数量；手算样例对得上；同种子两次成交序列哈希一致</td><td>部分：tca / twap 单元测试已通过</td></tr>
+          <tr><td>E2 成交模型与延迟敏感性</td><td>默认成交模型和 0 延迟会不会低估成本</td><td>每个因子报告 IS 变化的方向、大小和跨种子波动</td><td>先导：默认滑点有上限（约 1 个最小价位）</td></tr>
+          <tr><td>E3 数据层级与队列位置</td><td>L1 还是 L2、开不开 queue_position，结论变不变</td><td>IS 和成交率随父单大小的变化曲线</td><td>先导：1 / 1000 / 10000 手</td></tr>
+          <tr><td>E4 跨模拟器验证</td><td>Nautilus 与自写模拟器成交一致吗</td><td>先定义可接受差异，不一致的分类解释</td><td>未开始</td></tr>
+          <tr><td>E5 性能</td><td>自写订单簿多快、瓶颈在哪</td><td>每事件延迟 p50/p99/p99.9，两种实现对比</td><td>未开始</td></tr>
+          <tr><td>E6 AI 数字落地</td><td>解读里有没有编数字</td><td>对外输出的未落地数字为 0</td><td>未开始</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card scroll">
+      <h2>读码路线（自顶向下 L0–L5，再自底向上）</h2>
+      <table>
+        <thead><tr><th>层</th><th>读什么</th><th>产出</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td>L0 跑起来</td><td>最小回测例子</td><td>最小回测配方</td><td>完成：example_01 + 7 步大白话</td></tr>
+          <tr><td>L1 框架</td><td>NautilusKernel、MessageBus、Cache、DataEngine、RiskEngine、ExecutionEngine、Portfolio、Trader</td><td>手绘架构图</td><td>下一步</td></tr>
+          <tr><td>L2 “路由”</td><td>消息总线的主题与端点（指令走端点，行情和事件走发布/订阅）</td><td>订单指令路由表</td><td>未开始</td></tr>
+          <tr><td>L3 组件</td><td>回测引擎、模拟交易所、撮合引擎、风控</td><td>组件职责表 + 时间线</td><td>部分：读过大单成交的源码</td></tr>
+          <tr><td>L4 函数</td><td>追一笔订单：策略 → 风控 → 交易所 → 撮合 → 成交事件</td><td>调用链图</td><td>未开始</td></tr>
+          <tr><td>L5 变量</td><td>订单与成交模型的关键变量</td><td>变量字典（30 个）</td><td>未开始</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card scroll">
+      <h2>两周日程（优先级）</h2>
+      <p>P0（第 7 天前）：M0–M3 + E1–E3，形成“动机 → 方案 → 实验 → 结论”的完整闭环，可以投递。P1（第 11 天）：M4 + E4 + E5。P2（第 14 天）：M5 + M6 + E6。落后时的砍线顺序：先砍 E4，再砍看板，再把 M6 缩成“模板 + 数字校验器”。</p>
+      <p class="note">当前：第 1 天的目标（环境、跑通例子、读 L1）已完成大半，并提前做了 TCA 雏形和大单先导实验。</p>
+    </div>
   </section>
 
   <!-- 概念 -->
@@ -203,11 +295,11 @@ th{color:var(--muted);font-weight:500;font-size:13px}
   var tabs=[].slice.call(document.querySelectorAll('nav.tabs button'));
   function showTab(name){
     tabs.forEach(function(b){b.setAttribute('aria-selected',b.dataset.tab===name?'true':'false')});
-    ['progress','concepts','quiz','log','material'].forEach(function(n){document.getElementById('tab-'+n).hidden=(n!==name)});
+    ['progress','overview','concepts','quiz','log','material'].forEach(function(n){document.getElementById('tab-'+n).hidden=(n!==name)});
     S.set('tab',name);
   }
   tabs.forEach(function(b){b.addEventListener('click',function(){showTab(b.dataset.tab)})});
-  var t0=S.get('tab','progress'); if(['progress','concepts','quiz','log','material'].indexOf(t0)<0)t0='progress'; showTab(t0);
+  var t0=S.get('tab','progress'); if(['progress','overview','concepts','quiz','log','material'].indexOf(t0)<0)t0='progress'; showTab(t0);
 
   /* 复制 */
   function copyFrom(id,btn){
