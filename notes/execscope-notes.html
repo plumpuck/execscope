@@ -528,6 +528,14 @@ figure.fig figcaption{font-size:13px;color:var(--muted);margin-top:8px}
 
   /* 概念 */
   var C=[
+   ['回放：K 线怎么“送给”策略','Nautilus',
+    '回测不是真等一分钟，而是把历史数据按时间顺序一根根“回放”，每回放一根，就调用一次策略的 on_bar。',
+    '循环是这样的：①引擎手里有一份按时间排好的数据（我们是 9 根）；②把模拟时钟拨到这根 K 线的时间；③调用策略的 on_bar(bar)；④策略可能下单；⑤撮合引擎用这根 K 线的价格尝试成交；⑥拨到下一根。全程不用等真实时间，9 根在毫秒内跑完。引擎保证策略只能看到“此刻及以前”的数据，不会偷看未来。日志里 Iterations: 9 就是循环了 9 次，时间戳 2024-01-01 23:01 到 23:09 是数据里的时间。默认下单和成交发生在同一时刻（延迟为 0），这是一个乐观的假设，实验 E2 会检验。',
+    '“回测是事件回放：模拟时钟按数据时间推进，策略只在事件到来时被回调。”'],
+   ['6EH4 是什么：9 根 K 线、1 个品种','期货',
+    '6EH4 是芝加哥商品交易所（CME）的欧元期货，2024 年 3 月到期的那一份。',
+    '6E 是欧元兑美元期货的代码；H 是 3 月的月份代码；4 表示 2024 年。“9 根 K 线、1 个品种”的意思：数据只有 1 分钟 K 线 9 根（2024-01-01 23:01 到 23:09，共 9 分钟），只有这一个品种。这是官方最小演示数据，做实验够用来观察规则，但样本太少，正式实验（M0）要换更长、更多的数据。',
+    '“先用最小数据验证机制，再换更大的数据验证结论是否稳健。”'],
    ['K 线（Bar）与成交量','交易',
     '把一段时间里的价格压成 5 个数：开盘、最高、最低、收盘，加上成交量。',
     '1 分钟 K 线＝这 1 分钟内第一笔成交价（开）、最高价（高）、最低价（低）、最后一笔成交价（收）、一共成交多少手（量）。它比逐笔成交小得多，适合入门；缺点是看不到分钟内部的先后顺序，所以引擎要“假设”价格怎么走（开→高→低→收）。我们这个例子里第一根 K 线：开 1.1076、高 1.10785、低 1.1076、收 1.1078、量 205。',
@@ -740,7 +748,7 @@ figure.fig figcaption{font-size:13px;color:var(--muted);margin-top:8px}
    {s:'买 100000 手时 Traceback：ValueError invalid value greater than MONEY_MAX 9_223_372_036.0, was 13_840_923_975.0',c:'计算手续费时要算名义金额（手数×价格×合约乘数 125000），超过了 Money 的上限；一开始我猜成保证金不足，是错的',f:'把数量降到 10000 手（名义约 13.8 亿美元，低于上限）；以后先估算名义金额再选手数',st:'done'},
    {s:'fx_ema_cross_audusd_ticks.py 可能找不到测试数据',c:'推测：源码里 TEST_DATA_DIR 指向包目录旁的 tests/test_data，pip 安装版大概率没有这个目录（只读源码判断，未实际运行）',f:'先用自带数据的 example_01；之后要用 FillModel 时再处理数据路径',st:'todo'}
   ];
-  var logs=S.get('logs9',null); if(!logs||!logs.length)logs=seed.slice();
+  var logs=S.get('logs10',null); if(!logs||!logs.length)logs=seed.slice();
   var stName={todo:'待处理',doing:'处理中',done:'已解决'};
   function renderLog(){
     var h=''; logs.forEach(function(l,i){
@@ -751,16 +759,16 @@ figure.fig figcaption{font-size:13px;color:var(--muted);margin-top:8px}
     document.getElementById('loglist').innerHTML=h;
   }
   document.getElementById('loglist').addEventListener('change',function(e){
-    var i=e.target.dataset.st; if(i==null)return; logs[+i].st=e.target.value; S.set('logs9',logs); renderLog();
+    var i=e.target.dataset.st; if(i==null)return; logs[+i].st=e.target.value; S.set('logs10',logs); renderLog();
   });
   document.getElementById('loglist').addEventListener('click',function(e){
-    var b=e.target.closest('[data-del]'); if(!b)return; logs.splice(+b.dataset.del,1); S.set('logs9',logs); renderLog();
+    var b=e.target.closest('[data-del]'); if(!b)return; logs.splice(+b.dataset.del,1); S.set('logs10',logs); renderLog();
   });
   document.getElementById('logform').addEventListener('submit',function(e){
     e.preventDefault();
     var s=document.getElementById('f_sym').value.trim(); if(!s)return;
     logs.push({s:s,c:document.getElementById('f_cause').value.trim()||'待查',f:document.getElementById('f_fix').value.trim()||'待定',st:document.getElementById('f_st').value});
-    S.set('logs9',logs); ['f_sym','f_cause','f_fix'].forEach(function(id){document.getElementById(id).value=''}); renderLog();
+    S.set('logs10',logs); ['f_sym','f_cause','f_fix'].forEach(function(id){document.getElementById(id).value=''}); renderLog();
   });
   document.getElementById('copyLog').addEventListener('click',function(){
     var md='# debug-log\n\n'+logs.map(function(l,i){return '## '+(i+1)+'. '+l.s+'\n- 状态：'+stName[l.st]+'\n- 原因：'+l.c+'\n- 解决：'+l.f+'\n'}).join('\n');
