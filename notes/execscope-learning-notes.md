@@ -157,3 +157,4 @@
 ## 踩坑补充
 - 变量名拼写：属性名必须和 DemoStrategy 里的完全一致，是 self.bars_processed（不是 bar_count，也不是 bar_processed）。写错会报 AttributeError。VS Code 把鼠标放在红/黄波浪线上，或看终端报错的最后一行，就能看到哪个名字不存在。
 - 减少复制粘贴：可以直接发截图；让我看文件时，只发出问题的那一段和报错最后几行即可。
+- 不用 PowerShell 也能运行：在 VS Code 打开 .py 文件，右上角 ▶ (Run Python File) 会用已选的 .venv 解释器运行，输出在终端面板。前提：示例文件夹已加入工作区、右下角解释器选的是 .venv。注意当前工作目录可能是工作区根目录，若脚本用相对路径读 CSV 可能找不到文件。
