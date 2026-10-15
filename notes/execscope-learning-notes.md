@@ -22,6 +22,13 @@
 ## 框架图
 交互笔记页“框架”标签有图 1（一笔订单在引擎里怎么走）和图 2（ExecScope 流程）；仓库里是 docs/architecture.md（mermaid）。三层：行情层 → 决策与执行层 → 账户与分析层。每做完一步问自己：这一步在图里哪个位置？输入是什么？输出是什么？
 
+## 来源与许可（我们抄了 Nautilus 吗）
+- 官方例子文件（run_example.py、strategy.py、CSV）：Nautilus 的 LGPL-3.0 代码，只在本机运行，没有放进我们的仓库。
+- examples/ 里的 peek_bar.py、order_strategy.py：参照官方例子的写法、只用公开接口，属于“衍生”；已在文件头和 examples/README.md 写明来源和许可。run_order.py 是官方 run_example.py 的改名副本，不进仓库。
+- src/ 里的 tca.py、twap.py、vwap.py：我们自己写的纯 Python，不依赖 Nautilus。TWAP、VWAP、滑点、实施缺口是行业通用概念，不属于 Nautilus。
+- 简历说法：“基于 NautilusTrader 搭建”，自己的部分是 TCA 模块、拆单实验、测试和分析，不说成自己写了回测引擎。
+- 文件位置：peek_bar.py、order_strategy.py、run_order.py 在 `C:\Users\HP\nautilus_src\examples\backtest\example_01_load_bars_from_custom_csv`（需要同目录的 CSV 和 strategy.py）；在 VS Code 里用 File → Add Folder to Workspace 把它加进来。
+
 ## 文件地图（C:\Users\HP\execscope，对应仓库 src/）
 | 文件 | 作用 | 对应项目模块 |
 |---|---|---|

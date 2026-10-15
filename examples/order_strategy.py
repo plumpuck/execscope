@@ -1,5 +1,8 @@
 """First order strategy: buy on the first bar.
 
+Subclasses `DemoStrategy` from NautilusTrader's official example (LGPL-3.0) and uses only its
+public strategy API (`order_factory`, `submit_order`).
+
 Run with the official NautilusTrader example `example_01_load_bars_from_custom_csv`
 (develop_v1 branch). Not included here: that example's own files are LGPL-3.0 code.
 `quantity` is 1000 for the large-order experiment (first bar volume is only 205).

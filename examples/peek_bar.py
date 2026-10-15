@@ -1,4 +1,9 @@
-"""Print a pandas row next to the Bar object BarDataWrangler turns it into."""
+"""Print a pandas row next to the Bar object BarDataWrangler turns it into.
+
+Adapted from step 4 of NautilusTrader's official example `example_01_load_bars_from_custom_csv`
+(LGPL-3.0, https://github.com/nautechsystems/nautilus_trader). Run it inside that example's folder;
+the CSV file and `strategy.py` belong to NautilusTrader and are not copied into this repo.
+"""
 import pandas as pd
 from nautilus_trader.model.data import BarType
 from nautilus_trader.persistence.wranglers import BarDataWrangler
