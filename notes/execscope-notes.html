@@ -46,6 +46,7 @@ nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:v
 nav.tabs button{font:inherit;color:var(--muted);background:none;border:0;border-bottom:2px solid transparent;padding:6px 12px;cursor:pointer;white-space:nowrap}
 nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:700}
 section.panel{display:flex;flex-direction:column;gap:20px}
+section.panel[hidden]{display:none}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0}
 .callout{background:var(--accent-soft);border-radius:8px;padding:16px;min-width:0}
 .callout h2{margin-bottom:6px}
@@ -80,7 +81,8 @@ textarea,input[type=text],select{font:inherit;width:100%;padding:8px 10px;border
 textarea{min-height:76px;resize:vertical}
 .ans{margin-top:10px;padding:12px;background:var(--accent-soft);border-radius:6px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.log{display:grid;gap:8px;grid-template-columns:5.5em 1fr;font-size:14px}
+.log{display:grid;gap:8px;grid-template-columns:5.5em minmax(0,1fr);font-size:14px}
+.log dd{min-width:0;margin:0;overflow-wrap:anywhere}
 .log dt{color:var(--muted)}
 .log dd{margin:0;min-width:0}
 .logtop{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
