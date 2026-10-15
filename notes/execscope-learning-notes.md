@@ -19,6 +19,9 @@
 - VS Code 工作流：File → Open Folder 选 `C:\Users\HP\execscope`；Terminal → New Terminal，终端会自动在该文件夹里（提示符以 `execscope>` 结尾）；前面要有 `(.venv)`，没有就先运行 `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`，再运行 `.\.venv\Scripts\Activate.ps1`。
 - 写函数卡住时：先找项目里已有的类似写法（如 `total_quantity`、`average_price`），再做“填空”版本，最后才看完整答案。
 
+## 框架图
+交互笔记页“框架”标签有图 1（一笔订单在引擎里怎么走）和图 2（ExecScope 流程）；仓库里是 docs/architecture.md（mermaid）。三层：行情层 → 决策与执行层 → 账户与分析层。每做完一步问自己：这一步在图里哪个位置？输入是什么？输出是什么？
+
 ## 文件地图（C:\Users\HP\execscope，对应仓库 src/）
 | 文件 | 作用 | 对应项目模块 |
 |---|---|---|
@@ -45,7 +48,7 @@
 - [x] TCA 函数和单元测试（src/tca.py、src/test_tca.py）：用户已运行，4 个测试全部 OK
 - [x] TWAP 拆单函数和测试（src/twap.py、src/test_twap.py）：用户已运行，5 个测试全部 OK
 - [x] 安装 VS Code（用户想锻炼编程能力，之后在 VS Code 里写代码；教学方式改为“我给测试，你自己写”）
-- [ ] 自己写 interval_vwap（src/vwap.py），让 src/test_vwap.py 全部通过
+- [x] 自己写 interval_vwap（src/vwap.py）：用户已运行，5 个测试全部 OK
 - [ ] 建 `debug-log.md`
 
 ## 每次新开 PowerShell 的固定动作
@@ -99,7 +102,7 @@
 | 15 | 大单实验输出仍是 BUY 1、Quantity(1) | order_strategy.py 没有真正改成 make_qty(1000)（可能没保存或存错位置） | 用 Select-String 检查 make_qty 的数值，再在例子文件夹里重新修改保存 | 处理中 |
 | 15 已解决 | 大单实验仍是 BUY 1 | 文件没改成功 | 重新保存后 BUY 1_000，成交 52+948 | 已解决 |
 | 16 | 买 100000 手时 ValueError: invalid value greater than MONEY_MAX | 算手续费时的名义金额 13,840,923,975 超过 Money 上限 9,223,372,036（我先猜成保证金不足，猜错） | 数量降到 10000 手；以后先估算名义金额 | 已解决 |
-| 17 | VS Code 报 Expected indented block（vwap.py 第 11 行） | 把整个函数粘贴到了函数里面，出现了两个 def interval_vwap | 删掉多余的 def 行，函数体保持 4 个空格缩进 | 处理中 |
+| 17 | VS Code 报 Expected indented block（vwap.py 第 11 行） | 把整个函数粘贴到了函数里面，出现了两个 def interval_vwap | 删掉多余的 def 行，函数体保持 4 个空格缩进 | 已解决 |
 | 7 | fx_ema_cross 例子可能找不到测试数据 | 推测：TEST_DATA_DIR 指向包目录旁 tests/test_data（只读源码判断，未运行） | 先用 example_01 | 待处理 |
 
 ## 决定记录
