@@ -2,6 +2,17 @@
 
 GitHub 会把下面的 mermaid 代码渲染成图。更好看的版本在交互笔记页的“框架”标签（notes/execscope-notes.html）。
 
+## 图 0：真实交易流程里，ExecScope 在哪
+
+```mermaid
+flowchart LR
+  R[研究想法] --> D[投资决策<br/>基金经理/客户] --> O[订单管理 OMS] --> X["执行 EMS 与算法<br/>ExecScope"] --> F[成交 交易所] --> C[清算结算] --> A["事后分析 TCA<br/>ExecScope"]
+  A -.->|结论反馈：下次选哪个算法、拆多久| X
+  DATA[("行情数据贯穿全程：Bloomberg、Databento、交易所等")]
+```
+
+别人决定“买什么、买多少”，我们解决后面的“怎么买得便宜”（执行）和“买完花了多少”（事后分析）。
+
 ## 图 1：一笔订单在引擎里怎么走
 
 ```mermaid

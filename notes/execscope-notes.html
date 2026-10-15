@@ -144,6 +144,36 @@ figure.fig figcaption{font-size:13px;color:var(--muted);margin-top:8px}
 
   <!-- 框架 -->
   <section class="panel" id="tab-framework" hidden>
+
+    <div class="card">
+      <h2>图 0：真实交易流程里，ExecScope 在哪</h2>
+<figure class="fig"><div class="scroll">
+<svg class="dg" viewBox="0 0 860 250" role="img" aria-label="真实交易流程从研究、投资决策、订单管理、执行、成交、清算结算到事后分析；ExecScope 负责执行里的算法选择和事后分析 TCA，行情数据贯穿全程">
+<defs><marker id="ah0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+<rect class="box" x="0" y="40" width="104" height="60" rx="6"/><text x="52" y="66" text-anchor="middle">研究想法</text><text class="sub" x="52" y="84" text-anchor="middle">研究员</text>
+<rect class="box" x="126" y="40" width="104" height="60" rx="6"/><text x="178" y="66" text-anchor="middle">投资决策</text><text class="sub" x="178" y="84" text-anchor="middle">基金经理/客户</text>
+<rect class="box" x="252" y="40" width="104" height="60" rx="6"/><text x="304" y="66" text-anchor="middle">订单管理</text><text class="sub" x="304" y="84" text-anchor="middle">OMS</text>
+<rect class="bus" x="378" y="40" width="104" height="60" rx="6" style="stroke-width:2.2"/><text x="430" y="66" text-anchor="middle">执行</text><text class="sub" x="430" y="84" text-anchor="middle">EMS 与算法</text>
+<rect class="box" x="504" y="40" width="104" height="60" rx="6"/><text x="556" y="66" text-anchor="middle">成交</text><text class="sub" x="556" y="84" text-anchor="middle">交易所</text>
+<rect class="box" x="630" y="40" width="104" height="60" rx="6"/><text x="682" y="66" text-anchor="middle">清算结算</text><text class="sub" x="682" y="84" text-anchor="middle">后台</text>
+<rect class="bus" x="756" y="40" width="104" height="60" rx="6" style="stroke-width:2.2"/><text x="808" y="66" text-anchor="middle">事后分析</text><text class="sub" x="808" y="84" text-anchor="middle">TCA 成本报告</text>
+<line class="ln" x1="104" y1="70" x2="124" y2="70" marker-end="url(#ah0)"/>
+<line class="ln" x1="230" y1="70" x2="250" y2="70" marker-end="url(#ah0)"/>
+<line class="ln" x1="356" y1="70" x2="376" y2="70" marker-end="url(#ah0)"/>
+<line class="ln" x1="482" y1="70" x2="502" y2="70" marker-end="url(#ah0)"/>
+<line class="ln" x1="608" y1="70" x2="628" y2="70" marker-end="url(#ah0)"/>
+<line class="ln" x1="734" y1="70" x2="754" y2="70" marker-end="url(#ah0)"/>
+<path class="ln dash" d="M808 100 V150 H430 V102" marker-end="url(#ah0)"/>
+<text class="tl" x="620" y="144" text-anchor="middle">结论反馈：下次选哪个算法、拆多久</text>
+<text class="tl" x="430" y="32" text-anchor="middle" style="fill:var(--accent);font-weight:700">ExecScope</text>
+<text class="tl" x="808" y="32" text-anchor="middle" style="fill:var(--accent);font-weight:700">ExecScope</text>
+<text class="sub" x="52" y="122" text-anchor="start">决定“买什么、买多少”：不是我们做的部分</text>
+<rect class="bus" x="0" y="184" width="860" height="48" rx="6"/>
+<text x="430" y="206" text-anchor="middle">行情数据贯穿全程：Bloomberg、Databento、交易所等数据商提供</text>
+<text class="sub" x="430" y="223" text-anchor="middle">研究要用、执行要看、事后 TCA 要和市场价格比。我们的 CSV 就是这一层的一小份。</text>
+</svg></div>
+<figcaption>真实流程里，别人决定“买什么、买多少”，我们解决后面的“怎么买得便宜”（执行）和“买完花了多少”（事后分析）。</figcaption></figure>
+    </div>
     <div class="card">
       <h2>先记住三层</h2>
       <div class="grid2">
@@ -498,6 +528,26 @@ figure.fig figcaption{font-size:13px;color:var(--muted);margin-top:8px}
 
   /* 概念 */
   var C=[
+   ['K 线（Bar）与成交量','交易',
+    '把一段时间里的价格压成 5 个数：开盘、最高、最低、收盘，加上成交量。',
+    '1 分钟 K 线＝这 1 分钟内第一笔成交价（开）、最高价（高）、最低价（低）、最后一笔成交价（收）、一共成交多少手（量）。它比逐笔成交小得多，适合入门；缺点是看不到分钟内部的先后顺序，所以引擎要“假设”价格怎么走（开→高→低→收）。我们这个例子里第一根 K 线：开 1.1076、高 1.10785、低 1.1076、收 1.1078、量 205。',
+    '“我用 1 分钟 K 线做回测，知道它丢掉了分钟内部的信息，所以结论要带上这个限制。”'],
+   ['CSV 数据从哪来、和 Bloomberg 的关系','数据',
+    '行情数据一般来自数据商或交易所；Bloomberg 是其中最有名的终端，银行和基金台上几乎人手一台。',
+    '来源：交易所自己卖（如 CME）；数据商如 Bloomberg、LSEG（原 Refinitiv）、Databento 等，要订阅，且协议通常不允许随便转发；免费的有 Yahoo Finance、Binance 公开数据等，质量和用途各不相同。本项目用 Nautilus 自带的样例 CSV，不需要订阅。Bloomberg 终端除了数据，还有新闻、分析、聊天和下单执行；据我所知它也有自己的交易成本分析功能，思路和我们的 TCA 同类（需要时再核实）。有些高校图书馆或商学院有终端可以使用，具体看学校。',
+    '“真实台上数据来自 Bloomberg 这类数据商；我的项目用公开样例数据，数据层可以替换。”'],
+   ['策略 vs 执行算法','交易',
+    '策略决定“买什么、什么时候买”；执行算法决定“已经决定要买一大笔，怎么买才便宜”。',
+    '策略（alpha）来自研究：先有想法（如“快均线上穿慢均线就买”），再用历史数据回测验证。官方例子 fx_ema_cross 就是均线交叉策略。执行算法（TWAP、VWAP、POV）不判断涨跌，只负责把已经决定的一笔大单拆开、慢慢买完。ExecScope 做的是后者，以及买完之后的成本分析（TCA）。',
+    '“我不做预测涨跌的策略，我研究的是已知订单规模下的执行质量。”'],
+   ['BarDataWrangler 的原理','Nautilus',
+    '逐行把表格翻译成 Bar：价格和数量按品种规则取整，时间转成纳秒整数。',
+    '对 DataFrame 的每一行：用品种的价格精度（这里 5 位小数）生成 Price，用数量精度生成 Quantity，把时间（2024-01-01 23:01:00）转成 1970 年以来的纳秒整数，再和 BarType（品种+周期）一起装进 Bar 对象。引擎内部都用整数和固定精度，避免浮点误差。',
+    '“数据进入引擎前统一成引擎原生类型，保证精度和时间戳一致。”'],
+   ['DataEngine 需要懂到什么程度','学习方法',
+    '知道它做什么就够：接收行情，按订阅分发给策略。',
+    '理解分三档：“用得上”（会订阅、知道数据从哪来）、“讲得清”（能画出流程并说出每个箭头）、“改得动”（能读源码并修改）。ExecScope 里：策略、风控/执行引擎、撮合引擎与成交模型、Portfolio 要到“讲得清”；DataEngine 到“用得上”就行，读码路线里 L3 再深入。',
+    '“我按重要程度分配学习深度，把时间花在成交模型和 TCA 上。”'],
    ['滑点基点怎么读','TCA',
     '滑点基点＝平均多付了起始价的万分之几。',
     '起始价（到达价）是“如果瞬间买完、价格不动”的参照；大单分多笔成交，所以要用数量加权的平均成交价去比；用基点（1 基点＝0.01%）是为了不同价格的品种可以比较。例：52 手@1.10780 + 948 手@1.10785，平均 1.1078474，比 1.10780 多 0.0000474，÷1.10780 ≈ 0.43 基点。',
