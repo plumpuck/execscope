@@ -16,6 +16,8 @@
 - 每次交流后，把重点写入学习笔记，并同步到 GitHub（plumpuck/execscope）和 Project。
 - 命令一条一条复制、粘贴、回车；如果出现 `>>`，按 Ctrl+C 退出。
 - 新开 PowerShell 窗口要做四步：Set-ExecutionPolicy → cd execscope → 激活 .venv → cd 到例子文件夹。
+- VS Code 工作流：File → Open Folder 选 `C:\Users\HP\execscope`；Terminal → New Terminal，终端会自动在该文件夹里（提示符以 `execscope>` 结尾）；前面要有 `(.venv)`，没有就先运行 `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`，再运行 `.\.venv\Scripts\Activate.ps1`。
+- 写函数卡住时：先找项目里已有的类似写法（如 `total_quantity`、`average_price`），再做“填空”版本，最后才看完整答案。
 
 ## 当前进度（2026-10-08）
 - [x] 规划完成（项目、动机、设计、实验、读码路线、日程）
