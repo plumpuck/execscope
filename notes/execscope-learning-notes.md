@@ -19,6 +19,18 @@
 - VS Code 工作流：File → Open Folder 选 `C:\Users\HP\execscope`；Terminal → New Terminal，终端会自动在该文件夹里（提示符以 `execscope>` 结尾）；前面要有 `(.venv)`，没有就先运行 `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`，再运行 `.\.venv\Scripts\Activate.ps1`。
 - 写函数卡住时：先找项目里已有的类似写法（如 `total_quantity`、`average_price`），再做“填空”版本，最后才看完整答案。
 
+## 文件地图（C:\Users\HP\execscope，对应仓库 src/）
+| 文件 | 作用 | 对应项目模块 |
+|---|---|---|
+| tca.py | 交易成本分析函数：average_price（平均成交价）、slippage_bps（滑点基点）、cost_usd（美元成本） | M2 TCA 引擎 |
+| test_tca.py | tca.py 的“判卷老师”，用回测里观察到的数字（52+948、52+9948）检查结果 | E1 正确性 |
+| twap.py | twap_schedule：把父单平均拆成 N 份，余数分给前几份 | M1 执行算法 |
+| test_twap.py | twap.py 的单元测试 | E1 正确性 |
+| vwap.py | interval_vwap：一段时间内成交量加权均价（用户自己写） | M2 相对区间 VWAP |
+| test_vwap.py | vwap.py 的单元测试 | E1 正确性 |
+规则：`test_X.py` 检查 `X.py`；运行 `python test_X.py`，显示 OK 就是通过。纯 Python 文件不依赖 Nautilus。
+其他位置：`C:\Users\HP\nautilus_src\examples\backtest\example_01_load_bars_from_custom_csv` 里放官方例子和 order_strategy.py、run_order.py、output*.txt；`C:\Users\HP\execscope\.venv` 是虚拟环境。
+
 ## 当前进度（2026-10-08）
 - [x] 规划完成（项目、动机、设计、实验、读码路线、日程）
 - [x] 公共环境已清理（用户目录 10 个包已卸载，Anaconda 原版本恢复：pandas 2.2.3、fsspec 2025.3.2）
@@ -87,6 +99,7 @@
 | 15 | 大单实验输出仍是 BUY 1、Quantity(1) | order_strategy.py 没有真正改成 make_qty(1000)（可能没保存或存错位置） | 用 Select-String 检查 make_qty 的数值，再在例子文件夹里重新修改保存 | 处理中 |
 | 15 已解决 | 大单实验仍是 BUY 1 | 文件没改成功 | 重新保存后 BUY 1_000，成交 52+948 | 已解决 |
 | 16 | 买 100000 手时 ValueError: invalid value greater than MONEY_MAX | 算手续费时的名义金额 13,840,923,975 超过 Money 上限 9,223,372,036（我先猜成保证金不足，猜错） | 数量降到 10000 手；以后先估算名义金额 | 已解决 |
+| 17 | VS Code 报 Expected indented block（vwap.py 第 11 行） | 把整个函数粘贴到了函数里面，出现了两个 def interval_vwap | 删掉多余的 def 行，函数体保持 4 个空格缩进 | 处理中 |
 | 7 | fx_ema_cross 例子可能找不到测试数据 | 推测：TEST_DATA_DIR 指向包目录旁 tests/test_data（只读源码判断，未运行） | 先用 example_01 | 待处理 |
 
 ## 决定记录
