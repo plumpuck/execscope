@@ -140,3 +140,16 @@
 - 队列位置需 queue_position=True 且 trade_execution=True：docs/concepts/backtesting/trade-execution.md
 - PyPI 最新稳定版 1.231.0（2026-08-02）：https://pypi.org/project/nautilus-trader/
 - QMD 要求 Node.js >= 22、MIT：https://github.com/tobi/qmd 的 README 与 package.json
+
+## 文件按功能分组（谁在做什么）
+| 功能 | 文件 | 作用 | 有测试 |
+|---|---|---|---|
+| ① 算数工具（纯 Python） | tca.py | 平均成交价、滑点 bp、成本美元 | test_tca.py |
+| ① 算数工具 | twap.py | 把总量拆成 N 份的时间表 | test_twap.py |
+| ① 算数工具 | vwap.py | 区间成交量加权均价（基准价） | test_vwap.py |
+| ② 策略（在引擎里下单） | twap_strategy.py | 每根 K 线按时间表下一小笔 | 靠回测验证 |
+| ② 策略 | order_strategy.py | 第一根 K 线一次性买（对照组） | 靠回测验证 |
+| ③ 运行脚本 | run_twap.py / run_order.py | 装配引擎：数据 + 策略 → 跑回测 | - |
+| ④ 观察工具 | peek_bar.py | 看一行表格怎样变成 Bar | - |
+| ⑤ 数据 | 6EH4.XCME_1min_bars.csv | 9 根 1 分钟 K 线 | - |
+注：Pylance 提示 Import "strategy" could not be resolved，因为 strategy.py 在官方示例文件夹，不在 execscope 文件夹；运行时放在同一文件夹就能找到，不是错误。
