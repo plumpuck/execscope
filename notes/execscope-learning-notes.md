@@ -153,3 +153,7 @@
 | ④ 观察工具 | peek_bar.py | 看一行表格怎样变成 Bar | - |
 | ⑤ 数据 | 6EH4.XCME_1min_bars.csv | 9 根 1 分钟 K 线 | - |
 注：Pylance 提示 Import "strategy" could not be resolved，因为 strategy.py 在官方示例文件夹，不在 execscope 文件夹；运行时放在同一文件夹就能找到，不是错误。
+
+## 踩坑补充
+- 变量名拼写：属性名必须和 DemoStrategy 里的完全一致，是 self.bars_processed（不是 bar_count，也不是 bar_processed）。写错会报 AttributeError。VS Code 把鼠标放在红/黄波浪线上，或看终端报错的最后一行，就能看到哪个名字不存在。
+- 减少复制粘贴：可以直接发截图；让我看文件时，只发出问题的那一段和报错最后几行即可。
