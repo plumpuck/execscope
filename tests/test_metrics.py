@@ -1,4 +1,4 @@
-from tca import average_price, cost_usd, slippage_bps
+from execscope.tca.metrics import average_price, cost_usd, slippage_bps
 
 ARRIVAL = 1.10780
 MULT = 125_000  # EUR per contract (6E)

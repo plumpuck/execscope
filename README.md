@@ -1,26 +1,41 @@
 # ExecScope
 
-Execution-quality (TCA) and backtest-fidelity workbench built on top of
-[NautilusTrader](https://github.com/nautechsystems/nautilus_trader). Python first.
-
-**Question:** a backtest fills a large buy order at the bar price with zero slippage by default.
-How much execution cost does that hide, and how do TWAP-style order slicing and fill/latency
-models change the answer?
-
-## Status (learning phase, day 1)
-- [x] Environment: venv + `nautilus_trader==1.231.0`
-- [x] Ran the official `example_01_load_bars_from_custom_csv` backtest
-- [x] First order: buy 1 contract, 1 order / 1 position, fill at bar close, zero commission
-- [x] Large-order experiments: 1 / 1000 / 10000 contracts → default slippage stays about one tick (~$6/contract)
-- [ ] TCA functions + unit tests (`src/tca.py`, `src/test_tca.py`)
-- [ ] M0 parent-order scenario, M1 TWAP, M2 TCA metrics and unit tests
+Execution-quality TCA and backtest-fidelity workbench on NautilusTrader.
+Question it answers: *when a large parent order is executed (one-shot vs TWAP, later VWAP/POV/IS),
+what did it cost versus the arrival price, the interval VWAP and the Perold shortfall — and how
+much can we trust the backtest's fill model?*
 
 ## Layout
-- `docs/architecture.md` framework diagrams: how an order moves through the engine, and the ExecScope pipeline
-- `notes/execscope-overview.md` project overview (motivation, design M0–M6, experiments E1–E6, progress)
-- `notes/` plan, learning notes, debug log, interactive notes page (`execscope-notes.html`)
-- `src/` TCA helpers and their tests (pure Python)
-- `examples/` small scripts written while learning (they import files of the official example)
+| Folder | What is in it |
+|---|---|
+| `src/execscope/tca/` | `metrics.py` (avg price, slippage bp, USD cost), `shortfall.py` (Perold Implementation Shortfall split into delay / execution / opportunity / fees; VWAP slippage) |
+| `src/execscope/algos/` | `twap.py` (slice schedule), `vwap.py` (interval VWAP). Pure Python, no Nautilus needed |
+| `src/execscope/backtest/` | `strategies.py` (one-shot and TWAP execution strategy), `runner.py` (run a backtest and compute costs; CLI) |
+| `tests/` | unit tests + Nautilus integration tests on synthetic bars |
+| `data/` | where to put the CSV (see `data/README.md`) |
+| `examples/` | small learning scripts derived from the official Nautilus example (LGPL-3.0) |
+| `docs/`, `notes/` | architecture diagrams, roadmap v2, learning notes, resume draft |
 
-## Credit
-Uses NautilusTrader (LGPL-3.0) as a library. Its example code is not copied into this repo.
+## Setup (Windows PowerShell, Python 3.12+)
+```
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -e ".[backtest,dev]"
+python -m pytest
+```
+Expected: `25 passed` (a Pandas deprecation warning from Nautilus is harmless).
+
+## Run the comparison
+```
+python -W ignore -m execscope.backtest.runner --data path\to\6EH4.XCME_1min_bars.csv
+```
+Prints one-shot and TWAP results for a 10,000-lot BUY.
+
+## Status
+Tier 1 of `docs/roadmap-v2.md`. Done: TCA metrics, Perold IS, TWAP/VWAP helpers, Nautilus
+one-shot/TWAP runs, tests. Next: more benchmarks, VWAP/POV strategies, repeated experiments with
+confidence intervals, config files, CI.
+
+## Credit and license
+Uses NautilusTrader (LGPL-3.0) as a library through its public API. No Nautilus source is copied
+into `src/`.

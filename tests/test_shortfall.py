@@ -1,6 +1,6 @@
 import random
 
-from shortfall import implementation_shortfall, vwap_slippage_bps
+from execscope.tca.shortfall import implementation_shortfall, vwap_slippage_bps
 
 MULT = 125_000
 

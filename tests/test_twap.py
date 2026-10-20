@@ -1,4 +1,4 @@
-from twap import twap_schedule
+from execscope.algos.twap import twap_schedule
 
 
 def test_sum_equals_total():

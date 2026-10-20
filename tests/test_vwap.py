@@ -1,4 +1,4 @@
-from vwap import interval_vwap
+from execscope.algos.vwap import interval_vwap
 
 
 def close(a, b, tol=1e-9):
