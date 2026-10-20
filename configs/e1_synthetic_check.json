@@ -1,0 +1,10 @@
+{
+  "name": "e1_synthetic_check",
+  "data": "synthetic:0",
+  "instrument": "BTCUSDT",
+  "side": "BUY",
+  "qty": 60,
+  "horizon_bars": 30,
+  "n_parents": 20,
+  "seed": 0
+}
