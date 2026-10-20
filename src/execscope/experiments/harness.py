@@ -14,14 +14,19 @@ import platform
 import random
 import subprocess
 import sys
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
 from execscope.algos.schedules import build_volume_profile
 from execscope.backtest.runner import (
-    AlgoSpec, VenueSettings, analyse, load_bars_csv, run_backtest,
+    AlgoSpec,
+    VenueSettings,
+    analyse,
+    load_bars_csv,
+    run_backtest,
 )
 from execscope.data.quality import assert_clean
 from execscope.data.synthetic import synthetic_minute_bars
@@ -89,6 +94,8 @@ def run_experiment(cfg: ExperimentConfig) -> tuple[pd.DataFrame, dict, dict]:
     rows = []
     for p, s in enumerate(starts):
         window = df.iloc[s: s + cfg.horizon_bars]
+        # one fill-model seed per parent (same for every algorithm, so comparisons stay paired)
+        venue_p = replace(venue, seed=venue.seed * 100_003 + p)
         profile = profile_before(df, window.index[0], cfg.horizon_bars)
         for a in cfg.algos:
             spec = AlgoSpec(
@@ -96,7 +103,7 @@ def run_experiment(cfg: ExperimentConfig) -> tuple[pd.DataFrame, dict, dict]:
                 pov_rate=a.get("pov_rate", 0.1), kappa_t=a.get("kappa_t", 2.0),
                 profile=tuple(profile) if (a["name"] == "vwap" and profile) else (),
             )
-            r = run_backtest(window, spec, cfg.side, cfg.qty, cfg.instrument, venue, window_bars=cfg.horizon_bars)
+            r = run_backtest(window, spec, cfg.side, cfg.qty, cfg.instrument, venue_p, window_bars=cfg.horizon_bars)
             label = a.get("label", a["name"])
             rows.append({"parent": p, "start": str(window.index[0]), **analyse(r), "label": label})
     table = pd.DataFrame(rows)
@@ -108,7 +115,7 @@ def summarise(table: pd.DataFrame, cfg: ExperimentConfig) -> dict:
     base = table[table["label"] == cfg.baseline].set_index("parent")
     for label, g in table.groupby("label", sort=False):
         g = g.set_index("parent")
-        entry = {"n": int(len(g)), "fill_rate": float((g["filled_qty"] / g["target_qty"]).mean())}
+        entry: dict[str, Any] = {"n": int(len(g)), "fill_rate": float((g["filled_qty"] / g["target_qty"]).mean())}
         for m in METRICS:
             vals = g[m].dropna().tolist()
             if len(vals) >= 2:

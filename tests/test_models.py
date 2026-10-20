@@ -1,7 +1,8 @@
 import math
 
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 
 from execscope.models.almgren_chriss import ac_expected_cost_and_variance, ac_holdings, ac_schedule
 from execscope.models.impact import fit_sqrt_impact, sqrt_impact_bps

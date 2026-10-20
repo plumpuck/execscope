@@ -32,7 +32,7 @@ def paired_diff_ci(
     """Bootstrap interval of mean(a - b) for paired samples (same parent orders, two algorithms)."""
     if len(a) != len(b):
         raise ValueError("paired samples must have equal length")
-    return bootstrap_ci([x - y for x, y in zip(a, b)], n_boot=n_boot, alpha=alpha, seed=seed)
+    return bootstrap_ci([x - y for x, y in zip(a, b, strict=False)], n_boot=n_boot, alpha=alpha, seed=seed)
 
 
 def sign_test_p(diffs: Sequence[float]) -> float:

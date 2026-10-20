@@ -1,0 +1,10 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - execscope-data:/data
+    restart: unless-stopped
+volumes:
+  execscope-data:

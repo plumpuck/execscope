@@ -1,5 +1,6 @@
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 
 from execscope.algos.schedules import build_volume_profile, pov_child_qty, volume_profile_schedule
 
@@ -20,7 +21,7 @@ def test_profile_schedule_always_sums_and_nonnegative(total, w):
     s = volume_profile_schedule(total, w)
     assert sum(s) == total and all(x >= 0 for x in s)
     # a zero-weight slot never receives quantity
-    assert all(x == 0 for x, wi in zip(s, w) if wi == 0)
+    assert all(x == 0 for x, wi in zip(s, w, strict=False) if wi == 0)
 
 
 def test_profile_rejects_bad_input():

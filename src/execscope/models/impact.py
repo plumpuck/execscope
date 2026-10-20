@@ -43,7 +43,7 @@ def fit_sqrt_impact(observations: Sequence[tuple[float, float, float, float]]) -
     sxx = sum(x * x for x in xs)
     if sxx == 0:
         raise ValueError("all regressors are zero; cannot fit")
-    y = sum(x * c for x, c in zip(xs, ys)) / sxx
-    sse = sum((c - y * x) ** 2 for x, c in zip(xs, ys))
+    y = sum(x * c for x, c in zip(xs, ys, strict=False)) / sxx
+    sse = sum((c - y * x) ** 2 for x, c in zip(xs, ys, strict=False))
     syy = sum(c * c for c in ys)
     return ImpactFit(y=y, r_squared=1 - sse / syy if syy > 0 else 0.0, n=len(xs))

@@ -30,3 +30,26 @@ def synthetic_minute_bars(
             price = c
     df = pd.DataFrame(rows, columns=["timestamp", "open", "high", "low", "close", "volume"])
     return df.set_index("timestamp")
+
+
+def synthetic_trades(bars: pd.DataFrame, trades_per_bar: int = 20, seed: int = 0, tick: float = 0.01) -> pd.DataFrame:
+    """A trade tape consistent with the given bars (each bar's trades stay inside its high/low and
+    follow open -> high -> low -> close). Layout matches Binance aggTrades. VALIDATION ONLY."""
+    rng = random.Random(seed)
+    rows = []
+    tid = 0
+    for ts, b in bars.iterrows():
+        path = [b["open"], b["high"], b["low"], b["close"]]
+        weights = [rng.random() + 0.1 for _ in range(trades_per_bar)]
+        total = sum(weights)
+        for k in range(trades_per_bar):
+            pos = k / max(1, trades_per_bar - 1) * 3          # 0..3 along the 4-point path
+            i = min(int(pos), 2)
+            price = path[i] + (path[i + 1] - path[i]) * (pos - i)
+            price = min(max(round(price / tick) * tick, b["low"]), b["high"])
+            t = ts + pd.Timedelta(milliseconds=int(59_000 * k / trades_per_bar) + rng.randint(0, 500))
+            rows.append((tid, price, b["volume"] * weights[k] / total, tid, tid, t, rng.random() < 0.5))
+            tid += 1
+    df = pd.DataFrame(rows, columns=["agg_trade_id", "price", "quantity", "first_trade_id",
+                                     "last_trade_id", "transact_time", "is_buyer_maker"])
+    return df.set_index("transact_time").sort_index()

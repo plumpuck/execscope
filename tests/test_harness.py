@@ -3,10 +3,14 @@ import json
 import pytest
 
 pytest.importorskip("nautilus_trader")
-from execscope.experiments.harness import (  # noqa: E402
-    ExperimentConfig, choose_starts, profile_before, run_experiment, save,
-)
 from execscope.data.synthetic import synthetic_minute_bars  # noqa: E402
+from execscope.experiments.harness import (  # noqa: E402
+    ExperimentConfig,
+    choose_starts,
+    profile_before,
+    run_experiment,
+    save,
+)
 
 
 def small_cfg(**kw):
@@ -19,7 +23,7 @@ def small_cfg(**kw):
 def test_choose_starts_non_overlapping_and_seeded():
     s = choose_starts(5000, 30, 10, seed=1, warmup=100)
     assert s == choose_starts(5000, 30, 10, seed=1, warmup=100)
-    assert all(b - a >= 30 for a, b in zip(s, s[1:]))
+    assert all(b - a >= 30 for a, b in zip(s, s[1:], strict=False))
     with pytest.raises(ValueError):
         choose_starts(200, 30, 50, seed=1, warmup=100)
 

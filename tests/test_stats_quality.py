@@ -19,7 +19,7 @@ def test_paired_diff_detects_consistent_improvement():
     better = [x - 2 for x in base]
     est, lo, hi = paired_diff_ci(base, better, seed=3)
     assert est == pytest.approx(2.0) and lo > 0   # whole interval above 0
-    assert sign_test_p([x - y for x, y in zip(base, better)]) < 0.01
+    assert sign_test_p([x - y for x, y in zip(base, better, strict=False)]) < 0.01
 
 
 def test_sign_test_no_evidence_when_balanced():

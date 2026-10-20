@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ExecScope</title>
+<style>
+  :root { --bg:#fafaf8; --fg:#1c1c1a; --mute:#6b6b66; --line:#d9d8d2; --accent:#2b5fd9; --good:#1f7a4d; --bad:#b3402a; --card:#fff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#161615; --fg:#ecebe6; --mute:#9a9992; --line:#33332f; --accent:#7ea2ff; --good:#5fc08e; --bad:#e58a73; --card:#1e1e1c; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif; }
+  header { padding:20px 16px 8px; max-width:960px; margin:0 auto; }
+  h1 { margin:0; font-size:22px; } .sub { color:var(--mute); margin:2px 0 0; }
+  main { max-width:960px; margin:0 auto; padding:8px 16px 40px; display:grid; gap:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  select { font:inherit; padding:6px 8px; background:var(--card); color:var(--fg); border:1px solid var(--line); border-radius:6px; max-width:100%; }
+  table { border-collapse:collapse; width:100%; font-size:14px; } th, td { text-align:right; padding:6px 8px; border-bottom:1px solid var(--line); }
+  th:first-child, td:first-child { text-align:left; } th { color:var(--mute); font-weight:500; }
+  .wrap { overflow-x:auto; } svg { width:100%; height:auto; display:block; } .pos { color:var(--bad); } .neg { color:var(--good); }
+  pre { white-space:pre-wrap; margin:0; font:inherit; } .note { color:var(--mute); font-size:13px; }
+  .tag { display:inline-block; font-size:12px; border:1px solid var(--line); border-radius:999px; padding:1px 8px; color:var(--mute); }
+</style>
+</head>
+<body>
+<header><h1>ExecScope</h1><p class="sub">Execution cost by algorithm, with 95% bootstrap intervals. Lower is cheaper; zero means "same as the benchmark".</p></header>
+<main>
+  <div class="card"><label for="exp">Experiment </label><select id="exp"></select> <span id="meta" class="note"></span></div>
+  <div class="card"><h3 style="margin-top:0">Cost vs interval VWAP (bp)</h3><div id="chart"></div><p class="note">Dot = mean, line = 95% interval. If a line crosses zero, the data does not show a clear difference from the benchmark.</p></div>
+  <div class="card wrap"><h3 style="margin-top:0">Leaderboard</h3><table id="board"></table></div>
+  <div class="card"><h3 style="margin-top:0">Plain-language report <span id="ver" class="tag"></span></h3><pre id="report"></pre></div>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const fmt = (x, d = 2) => (x === null || x === undefined || Number.isNaN(x)) ? "–" : Number(x).toFixed(d);
+async function j(url) { const r = await fetch(url); if (!r.ok) throw new Error(url + " " + r.status); return r.json(); }
+
+function drawChart(summary) {
+  const rows = Object.entries(summary.algos).filter(([, e]) => e.vs_vwap_bps).map(([k, e]) => ({ k, ...e.vs_vwap_bps }));
+  if (!rows.length) { $("chart").textContent = "No data."; return; }
+  const lo = Math.min(0, ...rows.map(r => r.ci_low)), hi = Math.max(0, ...rows.map(r => r.ci_high));
+  const pad = (hi - lo) * 0.08 || 1, W = 640, rowH = 34, L = 90, R = 20, H = rows.length * rowH + 30;
+  const x = v => L + (v - (lo - pad)) / ((hi + pad) - (lo - pad)) * (W - L - R);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Cost by algorithm with intervals">`;
+  s += `<line x1="${x(0)}" x2="${x(0)}" y1="0" y2="${H - 22}" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="3 3"/>`;
+  rows.forEach((r, i) => {
+    const y = i * rowH + 18;
+    s += `<text x="0" y="${y + 4}" font-size="13" fill="currentColor">${r.k}</text>`;
+    s += `<line x1="${x(r.ci_low)}" x2="${x(r.ci_high)}" y1="${y}" y2="${y}" stroke="var(--accent)" stroke-width="2"/>`;
+    s += `<circle cx="${x(r.mean)}" cy="${y}" r="5" fill="var(--accent)"/>`;
+  });
+  s += `<text x="${x(0)}" y="${H - 6}" font-size="11" text-anchor="middle" fill="currentColor" fill-opacity=".6">0 bp</text></svg>`;
+  $("chart").innerHTML = s;
+}
+
+async function load(id) {
+  const [exp, board, rep] = await Promise.all([j(`/api/experiments/${id}`), j(`/api/experiments/${id}/leaderboard`), j(`/api/experiments/${id}/report`)]);
+  $("meta").textContent = `${exp.created_utc} · data ${exp.manifest.data || "?"}`;
+  drawChart(exp.summary);
+  $("board").innerHTML = `<tr><th>algo</th><th>parents</th><th>vs VWAP</th><th>vs arrival</th><th>IS</th><th>fill</th></tr>` +
+    board.map(b => `<tr><td>${b.label}</td><td>${b.n_parents}</td><td>${fmt(b.avg_vs_vwap_bps)}</td><td>${fmt(b.avg_vs_arrival_bps)}</td><td>${fmt(b.avg_is_bps)}</td><td>${fmt(b.fill_rate)}</td></tr>`).join("");
+  $("report").textContent = rep.text.replace(/\*\*/g, "").replace(/^## /, "");
+  $("ver").textContent = rep.verified ? "every number verified" : "NOT verified";
+}
+
+(async () => {
+  const list = await j("/api/experiments");
+  if (!list.length) { $("exp").innerHTML = "<option>no experiments yet</option>"; $("report").textContent = "Ingest or run an experiment first (see README)."; return; }
+  $("exp").innerHTML = list.map(e => `<option value="${e.id}">#${e.id} ${e.name}</option>`).join("");
+  $("exp").onchange = () => load($("exp").value);
+  load(list[0].id);
+})();
+</script>
+</body>
+</html>

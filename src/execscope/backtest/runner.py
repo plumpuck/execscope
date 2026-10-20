@@ -144,12 +144,15 @@ def run_backtest(
         engine.add_strategy(strategy)
         engine.run()
 
+        if strategy.arrival_price is None:
+            raise ValueError("the strategy saw no bars; check the data")
         n = window_bars or len(strategy.bar_log)
         window = strategy.bar_log[:n]
+        end_price = float(df["close"].iloc[min(n, len(df)) - 1])
         return RunResult(
             algo=spec.name, side=side, target_qty=total_qty, multiplier=float(inst.multiplier),
             fills=list(strategy.fills), arrival_price=strategy.arrival_price,
-            end_price=window and df["close"].iloc[min(n, len(df)) - 1] or strategy.end_price,
+            end_price=end_price,
             interval_vwap=interval_vwap(window), window_volume=sum(v for _, v in window),
             n_bars=strategy.bars_seen, extra={"submitted": strategy.submitted},
         )
