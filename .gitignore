@@ -6,3 +6,6 @@ data/*.csv
 !data/README.md
 *.egg-info/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+results/
