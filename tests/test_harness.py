@@ -54,3 +54,21 @@ def test_save_writes_three_files(tmp_path):
     out = save(cfg, table, summary, man, str(tmp_path))
     assert {p.name for p in out.iterdir()} == {"rows.csv", "summary.json", "manifest.json"}
     assert json.loads((out / "summary.json").read_text())["algos"]["twap"]["n"] == 4
+
+
+def test_harness_detects_a_real_effect_when_one_exists():
+    """Power check. In a strong uptrend a slow BUY pays more than a one-shot BUY versus the arrival price;
+    the paired interval must exclude zero. (On pure noise it must NOT - see the synthetic:0 runs.)"""
+    cfg = small_cfg(data="synthetic:3:0.0002", n_parents=12, horizon_bars=20, qty=60, n_boot=500,
+                    algos=[{"name": "oneshot"}, {"name": "twap"}])
+    _, summary, _ = run_experiment(cfg)
+    d = summary["paired_vs_baseline"]["twap"]["vs_arrival_bps"]
+    assert d["ci_low"] > 0 and d["sign_test_p"] < 0.05
+
+
+def test_harness_finds_nothing_on_pure_noise():
+    cfg = small_cfg(data="synthetic:3", n_parents=12, horizon_bars=20, qty=60, n_boot=500,
+                    algos=[{"name": "oneshot"}, {"name": "twap"}])
+    _, summary, _ = run_experiment(cfg)
+    d = summary["paired_vs_baseline"]["twap"]["vs_arrival_bps"]
+    assert d["ci_low"] <= 0 <= d["ci_high"]

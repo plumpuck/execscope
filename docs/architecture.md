@@ -61,3 +61,19 @@ flowchart TB
 | vwap.py | M2 | 成交量加权均价 |
 
 每做完一步，用自己的话回答：这一步在图里哪个位置？输入是什么？输出是什么？
+
+## v2 code structure (Tier 1-3)
+
+```mermaid
+flowchart TB
+  D[data: Binance files, quality checks] --> B[backtest: Nautilus strategies + runner]
+  A[algos + models: TWAP, VWAP, POV, Almgren-Chriss, sqrt impact] --> B
+  B --> T[tca: metrics, shortfall, benchmarks]
+  R[refsim: order-book reference] --> E
+  T --> E[experiments: harness, E1-E5]
+  S[stats: bootstrap, sign test] --> E
+  E --> DB[(SQLite / SQL)]
+  DB --> API[FastAPI + dashboard]
+  E --> X[explain: report + number verifier]
+  X --> API
+```

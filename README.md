@@ -8,33 +8,37 @@ much can we trust the backtest's fill model?*
 ## Layout
 | Folder | What is in it |
 |---|---|
-| `src/execscope/tca/` | `metrics.py` (avg price, slippage bp, USD cost), `shortfall.py` (Perold Implementation Shortfall split into delay / execution / opportunity / fees; VWAP slippage) |
-| `src/execscope/algos/` | `twap.py` (slice schedule), `vwap.py` (interval VWAP). Pure Python, no Nautilus needed |
-| `src/execscope/backtest/` | `strategies.py` (one-shot and TWAP execution strategy), `runner.py` (run a backtest and compute costs; CLI) |
-| `tests/` | unit tests + Nautilus integration tests on synthetic bars |
-| `data/` | where to put the CSV (see `data/README.md`) |
-| `examples/` | small learning scripts derived from the official Nautilus example (LGPL-3.0) |
-| `docs/`, `notes/` | architecture diagrams, roadmap v2, learning notes, resume draft |
+| `src/execscope/tca/` | `metrics.py`, `shortfall.py` (Perold IS: delay / execution / opportunity / fees), `benchmarks.py` (arrival, VWAP, close, participation) |
+| `src/execscope/algos/` | `twap.py`, `vwap.py`, `schedules.py` (volume-profile VWAP, POV). Pure Python |
+| `src/execscope/models/` | `almgren_chriss.py` (optimal trajectory), `impact.py` (square-root law + calibration) |
+| `src/execscope/stats/` | seeded bootstrap intervals, paired differences, sign test |
+| `src/execscope/refsim/` | order-book reference simulator (depth walking, resilience, permanent impact) |
+| `src/execscope/data/` | Binance readers, quality checks, bars preparation, synthetic data (code validation only) |
+| `src/execscope/backtest/` | NautilusTrader strategy + runner (one-shot, TWAP, VWAP, POV, Almgren-Chriss) |
+| `src/execscope/experiments/` | multi-parent harness, E1-E5, CLI |
+| `src/execscope/service/`, `sql/` | SQLite store (PostgreSQL-compatible SQL), FastAPI API, dashboard |
+| `src/execscope/explain/` | plain-language report + numeric-grounding verifier |
+| `tests/` | unit, property (hypothesis) and Nautilus integration tests |
+| `docs/guide.md` | **start here**: what every file does, how to run, how to read results |
 
 ## Setup (Windows PowerShell, Python 3.12+)
 ```
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install -e ".[backtest,dev]"
+pip install -e ".[backtest,service,dev]"
 python -m pytest
 ```
-Expected: `25 passed` (a Pandas deprecation warning from Nautilus is harmless).
 
-## Run the comparison
+## Experiments
 ```
-python -W ignore -m execscope.backtest.runner --data path\to\6EH4.XCME_1min_bars.csv
+python -W ignore -m execscope.experiments.cli e1 --data synthetic:0     # flow check on synthetic data
+python -W ignore -m execscope.experiments.cli e1 --data data/btcusdt_1m.csv
 ```
-Prints one-shot and TWAP results for a 10,000-lot BUY.
+See `docs/guide.md` for E1-E5, data download and the dashboard (`uvicorn execscope.service.app:app`).
 
 ## Status
-Tier 1 of `docs/roadmap-v2.md`. Done: TCA metrics, Perold IS, TWAP/VWAP helpers, Nautilus
-one-shot/TWAP runs, tests. Next: more benchmarks, VWAP/POV strategies, repeated experiments with
-confidence intervals, config files, CI.
+Roadmap v2 Tier 1-3 implemented and tested on synthetic data. **Real-data results: not yet produced.**
+Untested here: Docker build, Windows run.
 
 ## Credit and license
 Uses NautilusTrader (LGPL-3.0) as a library through its public API. No Nautilus source is copied

@@ -134,8 +134,8 @@ figure.fig figcaption{font-size:13px;color:var(--muted);margin-top:8px}
   <!-- 进度 -->
   <section class="panel" id="tab-progress">
     <div class="callout">
-      <h2>现在要做的一步：自己写 interval_vwap</h2>
-      <p>你已经装好 VS Code，想锻炼真正的编程能力，所以这一步改成“我给测试，你自己写函数”。在 VS Code 里新建 vwap.py 和 test_vwap.py，把 interval_vwap 写出来，让 5 个测试全部显示 OK。它是 TCA 里“相对区间 VWAP”需要的函数。</p>
+      <h2>现在：机构级版本已全部写完，你来跑、读、弄懂</h2>
+      <p>项目已重构成标准包，Tier 1 到 Tier 3 全部实现并通过 94 个测试（合成数据）。你要做的：解压 zip，按 docs/guide.md 安装并运行测试，再下载币安真实数据跑 E1 到 E5，读懂每个模块。真实数据的结果还没有产生，不要把合成数据的数字写进简历。</p>
       <p class="note" style="margin-top:10px">新开 PowerShell 窗口时要先运行 <code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</code>，再运行 <code>.\.venv\Scripts\Activate.ps1</code>，看到 (.venv) 再继续。命令一条一条粘贴，不要连成一行。</p>
     </div>
     <div class="card" id="checklist"></div>
@@ -494,7 +494,10 @@ figure.fig figcaption{font-size:13px;color:var(--muted);margin-top:8px}
      {id:'r8',x:1,t:'把观察到的数字写成第一个 TCA 函数和单元测试（tca.py、test_tca.py）',n:'4 个测试全部通过'},
      {id:'r9',x:1,t:'写 TWAP 拆单函数和测试（twap.py、test_twap.py）',n:'5 个测试全部通过'},
      {id:'r10',x:1,t:'安装 VS Code',n:'用户已装好，之后在 VS Code 里写代码'},
-     {id:'r11',t:'自己写 interval_vwap（vwap.py），让 test_vwap.py 全部通过',n:'第一次自己写函数：区间成交量加权均价'},
+     {id:'r11',t:'自己写 interval_vwap（vwap.py），让 test_vwap.py 全部通过（已完成，已并入 algos/vwap.py）',n:'第一次自己写函数：区间成交量加权均价'},
+     {id:'r12',t:'解压 execscope.zip，按 docs/guide.md 安装，python -m pytest 全部通过',n:'第一步：确认环境'},
+     {id:'r13',t:'下载币安 1 分钟 K 线（至少 3 到 5 天），用 data.prepare 合成 CSV 并读数据质量报告',n:'真实数据'},
+     {id:'r14',t:'跑 E1 到 E5，结果带置信区间，记录真实数字',n:'真实结果'},
      {id:'r4',t:'读 fx_ema_cross 例子里的 FillModel（成交模型）部分',n:'它读取测试数据目录，pip 安装版大概率找不到数据，要先处理'}]},
    {t:'阶段 3 · 做自己的部分（第 3 天起）',items:[
      {id:'b1',t:'M0 数据与父单场景'},

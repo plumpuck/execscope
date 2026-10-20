@@ -77,3 +77,24 @@ def test_true_vwap_hand_case_and_bias_table():
     res = granularity_bias(tape, starts, horizon_minutes=10)
     assert len(res) == 2 and (res["first_bar_range_bps"] >= 0).all()
     assert bar_vwap(bars.iloc[5:15]) > 0
+
+
+def test_prepare_klines_concatenates_files_and_writes_csv(tmp_path, capsys):
+    from execscope.data.prepare import main
+
+    bars = synthetic_minute_bars(n_days=1, seed=8).iloc[:10]
+    paths = []
+    for name, part in (("a.csv", bars.iloc[:5]), ("b.csv", bars.iloc[5:])):
+        epoch = part.index.as_unit("ms").astype("int64").to_numpy()
+        k = pd.DataFrame({"t": epoch, "o": part["open"].to_numpy(), "h": part["high"].to_numpy(), "l": part["low"].to_numpy(),
+                          "c": part["close"].to_numpy(), "v": part["volume"].to_numpy(), "ct": epoch + 59_999,
+                          "qv": 1.0, "n": 10, "tb": 1.0, "tq": 1.0, "ig": 0})
+        p = tmp_path / name
+        k.to_csv(p, index=False, header=False)
+        paths.append(str(p))
+    out = tmp_path / "bars.csv"
+    main(["klines", paths[1], paths[0], "--out", str(out)])      # files given out of order
+    from execscope.backtest.runner import load_bars_csv
+    back = load_bars_csv(str(out))
+    assert len(back) == 10 and back.index.is_monotonic_increasing
+    assert "data quality: clean" in capsys.readouterr().out

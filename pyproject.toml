@@ -38,3 +38,6 @@ ignore_missing_imports = true
 warn_unused_ignores = true
 check_untyped_defs = true
 files = ["src"]
+
+[tool.setuptools.package-data]
+execscope = ["service/static/*.html"]

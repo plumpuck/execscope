@@ -60,8 +60,10 @@ class ExperimentConfig:
 
 def load_data(cfg: ExperimentConfig) -> tuple[pd.DataFrame, str]:
     if cfg.data.startswith("synthetic:"):
-        seed = int(cfg.data.split(":")[1])
-        return synthetic_minute_bars(seed=seed), f"synthetic:{seed}"
+        parts = cfg.data.split(":")          # synthetic:<seed>[:<drift per bar>]
+        seed = int(parts[1])
+        drift = float(parts[2]) if len(parts) > 2 else 0.0
+        return synthetic_minute_bars(seed=seed, drift_per_bar=drift), cfg.data
     digest = hashlib.sha256(Path(cfg.data).read_bytes()).hexdigest()
     return load_bars_csv(cfg.data), f"sha256:{digest}"
 
