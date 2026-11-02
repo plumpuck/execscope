@@ -189,3 +189,11 @@
 - 发现 4：对到达价而言，慢速算法会被价格漂移污染（上涨趋势中 TWAP 买得更贵、下跌中更便宜），所以要同时看区间 VWAP；harness 的功效测试证明在强漂移下能检测到差异，在纯噪声下不会。
 - 未验证：Docker 构建、Windows 运行。
 
+## 任务 1：Windows 环境验证（2026-11-02）
+- 环境：Windows 11，Python 3.13.5，nautilus_trader 1.231.0，pandas 3.0.6；`pip install -e ".[backtest,service,dev]"` 装进 .venv。
+- 第一次运行：94 个测试，82 个通过，12 个失败，都是 `Money(10_000_000_000, USDT)` 报 ValueError：这台电脑上 Money 上限是 9,223,372,036。GitHub Actions 最新一次也是 Linux 通过、Windows 的测试步骤失败。
+- 修复：BTCUSDT 账户初始余额改为 90 亿 USDT（backtest/runner.py）。只改起始资金，不改实验逻辑。
+- 结果：pytest 94 个通过，ruff、mypy 通过；不设 OPENBLAS_NUM_THREADS 也能通过。
+- 通俗例子：Money 像一个最多显示 92 亿的计数器，填 100 亿就报错。所以以后跑大单前先算名义金额（数量 × 价格 × 合约乘数），不能超过这个上限。
+- 未验证：推送后 GitHub Actions 的 Windows 任务是否通过；Docker 构建。
+

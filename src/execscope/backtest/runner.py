@@ -110,7 +110,8 @@ def _instrument_and_venue(name: str):
         return inst, Venue("XCME"), AccountType.MARGIN, USD, [Money(1_000_000_000, USD)], Decimal(1)
     if name == "BTCUSDT":
         inst = TestInstrumentProvider.btcusdt_binance()
-        return inst, inst.id.venue, AccountType.CASH, None, [Money(10_000_000_000, USDT)], None
+        # Stay below Money's limit on Windows builds (MONEY_MAX = 9_223_372_036).
+        return inst, inst.id.venue, AccountType.CASH, None, [Money(9_000_000_000, USDT)], None
     raise ValueError("instrument must be '6EH4' or 'BTCUSDT'")
 
 

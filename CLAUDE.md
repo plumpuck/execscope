@@ -40,9 +40,11 @@ configs/; docs/; notes/. Install: `pip install -e ".[backtest,service,dev]"` (Py
   therefore uses one seed per parent (shared by all algorithms to keep comparisons paired).
 - Cost vs arrival price is polluted by drift (slow algos look expensive in uptrends, cheap in downtrends);
   always read it together with cost vs interval VWAP.
+- Windows Nautilus builds cap Money at 9_223_372_036: balances and notionals above it raise ValueError, even if the
+  same run passes on Linux. Check notional before sizing a large run.
 - Windows differences: activate with `.\.venv\Scripts\Activate.ps1`; new PowerShell may need
   `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`.
 
 ## Not yet verified
-Docker image build; Windows test run; real Binance file layouts (written from Binance docs, tested on synthetic
+Docker image build; GitHub Actions on Windows (local Windows run passes: Python 3.13, 94 tests); real Binance file layouts (written from Binance docs, tested on synthetic
 files); any real-data result.
