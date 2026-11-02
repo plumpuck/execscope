@@ -7,6 +7,7 @@ dependencies = ["pandas"]
 
 [project.optional-dependencies]
 backtest = ["nautilus_trader"]
+live = ["ib_async", "yfinance"]
 dev = ["pytest", "hypothesis", "ruff", "mypy"]
 service = ["fastapi", "uvicorn", "httpx"]
 
@@ -30,7 +31,9 @@ select = ["E", "F", "W", "I", "B", "UP"]
 ignore = ["E501"]
 
 [tool.ruff.lint.flake8-bugbear]
-extend-immutable-calls = ["fastapi.Body", "execscope.backtest.runner.AlgoSpec", "execscope.backtest.runner.VenueSettings"]
+extend-immutable-calls = ["fastapi.Body", "execscope.backtest.runner.AlgoSpec", "execscope.backtest.runner.VenueSettings",
+  "execscope.live.rebalance.PlanConfig", "execscope.live.risk.RiskLimits", "execscope.portfolio.backtest.BacktestConfig",
+  "execscope.portfolio.strategy.StrategyConfig"]
 
 [tool.mypy]
 python_version = "3.12"

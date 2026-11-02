@@ -45,3 +45,28 @@ def sign_test_p(diffs: Sequence[float]) -> float:
     k = min(k, n - k)
     p = sum(math.comb(n, i) for i in range(k + 1)) / 2**n
     return min(1.0, 2 * p)
+
+
+def block_bootstrap_diff(
+    a: Sequence[float], b: Sequence[float], stat: Callable[[Sequence[float]], float],
+    block: int = 6, n_boot: int = 2000, alpha: float = 0.05, seed: int = 0,
+) -> tuple[float, float, float]:
+    """(estimate, low, high) for stat(a) - stat(b) using a circular block bootstrap.
+
+    Blocks keep short-term autocorrelation of returns (a plain bootstrap would understate uncertainty).
+    The same block positions are used for a and b, so the comparison stays paired.
+    """
+    if len(a) != len(b) or len(a) < 2 * block:
+        raise ValueError("need equal-length series, at least 2 blocks long")
+    n = len(a)
+    rng = random.Random(seed)
+    diffs = []
+    for _ in range(n_boot):
+        idx: list[int] = []
+        while len(idx) < n:
+            start = rng.randrange(n)
+            idx.extend((start + k) % n for k in range(block))
+        idx = idx[:n]
+        diffs.append(stat([a[i] for i in idx]) - stat([b[i] for i in idx]))
+    diffs.sort()
+    return stat(a) - stat(b), diffs[int((alpha / 2) * n_boot)], diffs[min(n_boot - 1, int((1 - alpha / 2) * n_boot))]
