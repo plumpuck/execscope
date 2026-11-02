@@ -45,6 +45,10 @@ configs/; docs/; notes/. Install: `pip install -e ".[backtest,service,dev]"` (Py
 - Windows differences: activate with `.\.venv\Scripts\Activate.ps1`; new PowerShell may need
   `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`.
 
+## Live ETF strategy (src/execscope/{portfolio,live}, docs/live-trading-guide.md)
+Multi-asset ETF trend + risk parity for IBKR; dry-run default; real money needs flag + EXECSCOPE_ALLOW_LIVE=1 + typed phrase.
+IBKR adapter tested only against a fake IB object. No real backtest result exists yet; never state one without a real run.
+
 ## Not yet verified
 Docker image build; GitHub Actions on Windows (local Windows run passes: Python 3.13, 94 tests); real Binance file layouts (written from Binance docs, tested on synthetic
 files); any real-data result.

@@ -197,3 +197,8 @@
 - 通俗例子：Money 像一个最多显示 92 亿的计数器，填 100 亿就报错。所以以后跑大单前先算名义金额（数量 × 价格 × 合约乘数），不能超过这个上限。
 - 未验证：推送后 GitHub Actions 的 Windows 任务是否通过；Docker 构建。
 
+
+## Live ETF strategy added (Nov 2026)
+- 12 modules/tests: signal -> weights -> planner -> risk checks -> broker (Paper / IBKR via ib_async). 131 tests pass.
+- Lesson: dry-run default + three-key gate for real money; drawdown kill-switch moves to cash and halts until manual reset.
+- Not verified: IBKR adapter against real TWS/Gateway, real prices, any backtest numbers.
