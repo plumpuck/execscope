@@ -98,3 +98,6 @@ def test_prepare_klines_concatenates_files_and_writes_csv(tmp_path, capsys):
     back = load_bars_csv(str(out))
     assert len(back) == 10 and back.index.is_monotonic_increasing
     assert "data quality: clean" in capsys.readouterr().out
+
+    main(["klines", str(tmp_path / "?.csv"), "--out", str(out)])  # wildcard: PowerShell leaves it to us
+    assert len(load_bars_csv(str(out))) == 10

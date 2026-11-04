@@ -1,11 +1,13 @@
 """Turn downloaded Binance klines files into the bars CSV that ExecScope reads.
 
     python -m execscope.data.prepare klines BTCUSDT-1m-2024-01-02.zip BTCUSDT-1m-2024-01-03.zip --out data/btcusdt_1m.csv
+    python -m execscope.data.prepare klines "data/raw/BTCUSDT-1m-*.zip" --out data/btcusdt_1m.csv
 
-Several files are concatenated in time order. The result is checked with the data-quality layer and
+Wildcards are expanded here because PowerShell does not expand them. Several files are concatenated in time order. The result is checked with the data-quality layer and
 any problems are printed (gaps are reported but do not stop the conversion).
 """
 import argparse
+import glob
 
 import pandas as pd
 
@@ -25,7 +27,7 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("files", nargs="+")
     p.add_argument("--out", required=True)
     a = p.parse_args(argv)
-    bars = prepare_klines(a.files)
+    bars = prepare_klines([match for f in a.files for match in sorted(glob.glob(f)) or [f]])
     write_bars_csv(bars, a.out)
     print(f"wrote {len(bars)} bars {bars.index.min()} -> {bars.index.max()} to {a.out}")
     issues = check_bars(bars)

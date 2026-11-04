@@ -67,10 +67,14 @@ python -W ignore -m execscope.experiments.cli e1 --data synthetic:0
 
 ## 四、用真实币安数据
 
-1. 打开 https://data.binance.vision ，进入 `spot → daily → klines → BTCUSDT → 1m`，下载连续几天的 zip（文件名形如 `BTCUSDT-1m-2024-01-02.zip`；以网页上实际显示为准）。要做 E4，再从 `aggTrades → BTCUSDT` 下载同一天的 zip。
+1. 下载连续几天的 zip 到 `data/raw/`（已有的文件会跳过，每个文件都会核对币安公布的校验和）。日期包含首尾，按 UTC：
+```
+python -m execscope.data.download klines BTCUSDT 2026-10-26 2026-11-01
+```
+要做 E4，再下载同一天的成交流水（把 `klines` 换成 `aggTrades`，文件比 K 线大得多）。
 2. 合成一个 bars 文件：
 ```
-python -m execscope.data.prepare klines 文件1.zip 文件2.zip 文件3.zip --out data/btcusdt_1m.csv
+python -m execscope.data.prepare klines "data/raw/BTCUSDT-1m-*.zip" --out data/btcusdt_1m.csv
 ```
 它会打印数据质量报告。**先看报告再做实验。**
 3. 跑实验：

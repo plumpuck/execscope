@@ -195,10 +195,23 @@
 - 修复：BTCUSDT 账户初始余额改为 90 亿 USDT（backtest/runner.py）。只改起始资金，不改实验逻辑。
 - 结果：pytest 94 个通过，ruff、mypy 通过；不设 OPENBLAS_NUM_THREADS 也能通过。
 - 通俗例子：Money 像一个最多显示 92 亿的计数器，填 100 亿就报错。所以以后跑大单前先算名义金额（数量 × 价格 × 合约乘数），不能超过这个上限。
-- 未验证：推送后 GitHub Actions 的 Windows 任务是否通过；Docker 构建。
+- GitHub Actions（commit c4460c1）：Linux 和 Windows、Python 3.12 和 3.13 共 4 个任务全部通过（安装、ruff、mypy、测试）。
+- 未验证：Docker 构建。
 
 
 ## Live ETF strategy added (Nov 2026)
 - 12 modules/tests: signal -> weights -> planner -> risk checks -> broker (Paper / IBKR via ib_async). 131 tests pass.
 - Lesson: dry-run default + three-key gate for real money; drawdown kill-switch moves to cash and halts until manual reset.
 - Not verified: IBKR adapter against real TWS/Gateway, real prices, any backtest numbers.
+
+## 任务 2：下载币安真实数据（2026-11-04）
+- 新增 data/download.py：只用标准库 urllib；已有文件跳过；网络错误重试，404 不重试；先写 .part，核对币安公布的 SHA-256 后才改成正式文件名。测试用假网络，不真的联网。
+- prepare 现在自己展开通配符，因为 PowerShell 不会展开 `*`。
+- 数据：币安现货 BTCUSDT 1 分钟 K 线，2026-10-26 到 2026-11-01（UTC），7 天 10,080 根。这是加密货币数据，不是期货市场数据。
+- 真实文件格式已核对：没有表头，12 列，微秒时间戳，每天 1,440 行，和 binance.py 的假设一致。aggTrades、bookTicker 还没核对。
+- 数据质量报告：只有 return_outliers x4。另外核对：缺失 0、重复 0、NaN 0、零成交量 0、每根 K 线的均价都在最高最低价之间。
+- 4 个异常跳变（|收益| > 50 bp，集中在 10-29 和 10-30）：成交量是中位数的 11 到 55 倍，成交笔数是 12 到 20 倍，下一分钟没有回到原价。判断是真实行情，保留不删。这是根据这些特征的判断，没有用其他交易所的数据对照。
+- 这一周的特点：收盘价从 80,155.53 跌到 78,354.00（约 -2.25%）；日成交量从 6,288 BTC（周六）到 24,296 BTC（周五），差约 4 倍；每分钟成交量中位数 6.06 BTC。
+- 通俗例子：基点（bp）是万分之一，80,000 美元的价格涨 50 bp 就是涨 400 美元。
+- 给任务 3 的提醒：实验默认父单 60 BTC，约是每分钟成交量中位数的 10 倍；只跑一周，跌势和波动事件都会影响结果，结论只能说这一周。
+- 未验证：任何真实数据实验结果。

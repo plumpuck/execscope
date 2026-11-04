@@ -42,6 +42,8 @@ configs/; docs/; notes/. Install: `pip install -e ".[backtest,service,dev]"` (Py
   always read it together with cost vs interval VWAP.
 - Windows Nautilus builds cap Money at 9_223_372_036: balances and notionals above it raise ValueError, even if the
   same run passes on Linux. Check notional before sizing a large run.
+- Real Binance spot klines (checked on BTCUSDT 1m, 2026-10-26 to 2026-11-01): no header, 12 columns, microsecond
+  timestamps, 1,440 rows per UTC day. data/raw/ and data/*.csv stay out of git.
 - Windows differences: activate with `.\.venv\Scripts\Activate.ps1`; new PowerShell may need
   `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`.
 
@@ -50,5 +52,5 @@ Multi-asset ETF trend + risk parity for IBKR; dry-run default; real money needs 
 IBKR adapter tested only against a fake IB object. No real backtest result exists yet; never state one without a real run.
 
 ## Not yet verified
-Docker image build; GitHub Actions on Windows (local Windows run passes: Python 3.13, 94 tests); real Binance file layouts (written from Binance docs, tested on synthetic
-files); any real-data result.
+Docker image build; real Binance aggTrades and bookTicker file layouts (written from Binance docs, tested on
+synthetic files); any real-data experiment result.

@@ -4,6 +4,7 @@ __pycache__/
 output*.txt
 data/*.csv
 !data/README.md
+data/raw/
 *.egg-info/
 .pytest_cache/
 .mypy_cache/
