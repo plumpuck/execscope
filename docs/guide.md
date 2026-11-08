@@ -82,10 +82,21 @@ python -m execscope.data.prepare klines "data/raw/BTCUSDT-1m-*.zip" --out data/b
 python -W ignore -m execscope.experiments.cli e1 --data data/btcusdt_1m.csv --parents 40
 python -W ignore -m execscope.experiments.cli e2 --data data/btcusdt_1m.csv
 python -W ignore -m execscope.experiments.cli e3 --data data/btcusdt_1m.csv
-python -W ignore -m execscope.experiments.cli e4 --trades 某天的aggTrades.zip
+python -W ignore -m execscope.experiments.cli e4 --trades "data/raw/BTCUSDT-aggTrades-*.zip"
 python -W ignore -m execscope.experiments.cli e5 --data data/btcusdt_1m.csv
 ```
 注意：实验里的窗口需要有"前几天同一时段"的历史来做 VWAP 的成交量分布，所以至少下载 3 到 5 天的数据。
+
+如果质量报告指出了问题，实验会停下。逐个检查后确认可以接受，再加 `--allow-quality return_outliers` 这样的参数，它会写进运行记录。
+
+4. 把结果写入数据库，然后打开看板 http://127.0.0.1:8000：
+```
+python -m execscope.service.ingest results/e1 "results/e2__*" "results/e5__*"
+```
+```
+uvicorn execscope.service.app:app
+```
+真实数据的结果和解读在 `notes/results.md`。
 
 ## 五、五个实验问什么、怎么读
 
@@ -108,6 +119,6 @@ python -W ignore -m execscope.experiments.cli e5 --data data/btcusdt_1m.csv
 ## 七、已知局限（我没有验证过的）
 
 - Docker 镜像和 compose 我写好了，但沙箱里没有 Docker 引擎，**没有实际构建过**。
-- 币安文件的列名和时间单位按官方文档编写，并用合成文件测试；你下载第一个真实文件后，请先用 `describe()` 看一眼。
-- Windows 上的运行我没有测过（GitHub Actions 的配置里包含 Windows，推送后会自动测）。
+- 币安现货 klines 和 aggTrades 的真实格式已核对；bookTicker 还没有核对。
+- Windows 上的测试已通过（本机和 GitHub Actions）。
 - 1 分钟 K 线下，延迟小于一分钟的设置会被量化成"下一根 K 线成交"，所以 1 秒、30 秒、60 秒的延迟在合成数据上结果相同。这是 K 线数据的局限，也是 E4 要量化的内容。

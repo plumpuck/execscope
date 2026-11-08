@@ -44,6 +44,10 @@ configs/; docs/; notes/. Install: `pip install -e ".[backtest,service,dev]"` (Py
   same run passes on Linux. Check notional before sizing a large run.
 - Real Binance spot klines (checked on BTCUSDT 1m, 2026-10-26 to 2026-11-01): no header, 12 columns, microsecond
   timestamps, 1,440 rows per UTC day. data/raw/ and data/*.csv stay out of git.
+- Real aggTrades (same dates): no header, 8 columns, microseconds; bars rebuilt from them match the klines exactly.
+- On real BTCUSDT data the default fill model ignores size (one-shot about 0.001 bp at 60, 120 and 240 BTC) and fills
+  orders larger than the whole window's volume, so E1 cannot measure impact savings. See notes/results.md.
+- POV child sizes are rounded to whole BTC, and 60 BTC at 10% often cannot finish in 30 minutes (fill rate 0.423).
 - Windows differences: activate with `.\.venv\Scripts\Activate.ps1`; new PowerShell may need
   `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`.
 
@@ -52,5 +56,5 @@ Multi-asset ETF trend + risk parity for IBKR; dry-run default; real money needs 
 IBKR adapter tested only against a fake IB object. No real backtest result exists yet; never state one without a real run.
 
 ## Not yet verified
-Docker image build; real Binance aggTrades and bookTicker file layouts (written from Binance docs, tested on
-synthetic files); any real-data experiment result.
+Docker image build; real Binance bookTicker file layout (written from Binance docs, tested on synthetic files).
+E1-E5 have real-data results for one week only (notes/results.md); E3 still rests on an uncalibrated depth assumption.
