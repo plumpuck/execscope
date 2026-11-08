@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 
 from execscope.live.cli import LIVE_PHRASE, ensure_live_allowed, main
@@ -20,6 +21,7 @@ def test_real_money_needs_flag_env_and_typed_sentence():
 @pytest.fixture
 def prices_csv(tmp_path):
     p = uptrend_history()
+    p.index = p.index + (pd.Timestamp.today().normalize() - p.index[-1])  # keep clear of the stale-data guard
     path = tmp_path / "prices.csv"
     p.to_csv(path)
     return str(path)

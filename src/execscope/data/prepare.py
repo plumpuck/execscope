@@ -7,11 +7,10 @@ Wildcards are expanded here because PowerShell does not expand them. Several fil
 any problems are printed (gaps are reported but do not stop the conversion).
 """
 import argparse
-import glob
 
 import pandas as pd
 
-from execscope.data.binance import klines_to_bars, read_binance, write_bars_csv
+from execscope.data.binance import expand_paths, klines_to_bars, read_binance, write_bars_csv
 from execscope.data.quality import check_bars
 
 
@@ -27,7 +26,7 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("files", nargs="+")
     p.add_argument("--out", required=True)
     a = p.parse_args(argv)
-    bars = prepare_klines([match for f in a.files for match in sorted(glob.glob(f)) or [f]])
+    bars = prepare_klines(expand_paths(a.files))
     write_bars_csv(bars, a.out)
     print(f"wrote {len(bars)} bars {bars.index.min()} -> {bars.index.max()} to {a.out}")
     issues = check_bars(bars)

@@ -13,6 +13,8 @@ milliseconds to microseconds in 2025, so both are handled. The column layouts ab
 published documentation; ALWAYS run `describe()` on the first file you download and eyeball it before
 trusting an experiment.
 """
+import glob
+
 import pandas as pd
 
 LAYOUTS = {
@@ -35,12 +37,32 @@ def _to_datetime(s: pd.Series) -> pd.Series:
     return pd.to_datetime(s.astype("int64"), unit=unit)
 
 
+def expand_paths(patterns: list[str]) -> list[str]:
+    """Expand wildcards here because PowerShell does not. A pattern that matches nothing is kept as given."""
+    return [match for p in patterns for match in sorted(glob.glob(p)) or [p]]
+
+
+def _is_header(first_cell: str) -> bool:
+    """A header row starts with a non-numeric token such as "open_time" or "agg_trade_id"."""
+    return not first_cell.lstrip("-").replace(".", "", 1).isdigit()
+
+
+def read_columns(path: str, kind: str, columns: tuple[str, ...]) -> pd.DataFrame:
+    """Read only the time column and the numeric `columns`, as numbers. A day of aggTrades is over 100 MB of
+    text, so this uses a small fraction of the memory that `read_binance` needs."""
+    time_col = TIME_COLUMN[kind]
+    first = pd.read_csv(path, header=None, dtype=str, nrows=1)
+    df = pd.read_csv(path, header=None, names=LAYOUTS[kind][: first.shape[1]], usecols=[time_col, *columns],
+                     skiprows=int(_is_header(first.iloc[0, 0])), dtype={time_col: "int64", **dict.fromkeys(columns, "float64")})
+    df[time_col] = _to_datetime(df[time_col])
+    return df.set_index(time_col).sort_index()
+
+
 def read_binance(path: str, kind: str) -> pd.DataFrame:
     if kind not in LAYOUTS:
         raise ValueError(f"kind must be one of {sorted(LAYOUTS)}")
     raw = pd.read_csv(path, header=None, dtype=str)
-    # a header row starts with a non-numeric token such as "open_time" or "agg_trade_id"
-    if not raw.iloc[0, 0].lstrip("-").replace(".", "", 1).isdigit():
+    if _is_header(raw.iloc[0, 0]):
         raw = raw.iloc[1:].reset_index(drop=True)
     names = LAYOUTS[kind][: raw.shape[1]]
     if raw.shape[1] < len(names):

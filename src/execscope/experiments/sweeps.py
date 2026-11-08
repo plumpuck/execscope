@@ -6,15 +6,18 @@ A variant is a dict of ExperimentConfig field overrides, e.g. {"venue": {"latenc
 """
 from dataclasses import replace
 
-from execscope.experiments.harness import ExperimentConfig, run_experiment
+from execscope.experiments.harness import ExperimentConfig, run_experiment, save
 
 
-def run_variants(base: ExperimentConfig, variants: dict[str, dict]) -> dict[str, dict]:
-    """label -> summary.json-style dict. A 'default' variant (no overrides) is always included first."""
+def run_variants(base: ExperimentConfig, variants: dict[str, dict], root: str | None = None) -> dict[str, dict]:
+    """label -> summary.json-style dict. A 'default' variant (no overrides) is always included first.
+    With `root`, each variant's rows, summary and manifest are saved under root/<name>__<label>/."""
     out = {}
     for label, over in {"default": {}, **variants}.items():
         cfg = replace(base, name=f"{base.name}__{label}", **over)
-        _, summary, _ = run_experiment(cfg)
+        table, summary, man = run_experiment(cfg)
+        if root is not None:
+            save(cfg, table, summary, man, root)
         out[label] = summary
     return out
 

@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from execscope.data.binance import klines_to_bars, read_binance, trades_to_bars, write_bars_csv
+from execscope.data.binance import klines_to_bars, read_binance, read_columns, trades_to_bars, write_bars_csv
 from execscope.data.synthetic import synthetic_minute_bars, synthetic_trades
 from execscope.experiments.granularity import bar_vwap, granularity_bias, true_vwap
 
@@ -31,6 +31,15 @@ def test_read_aggtrades_handles_header_and_time_unit(tmp_path, header, unit):
     assert got.index.min().floor("ms") == tape.index.min().floor("ms")
     assert got["price"].iloc[0] == pytest.approx(tape["price"].iloc[0])
     assert got["is_buyer_maker"].dtype == bool
+
+
+@pytest.mark.parametrize("header", [True, False])
+def test_read_columns_matches_the_full_reader(tmp_path, header):
+    path, _ = _write_trades(tmp_path, header, "us")
+    full = read_binance(str(path), "aggTrades")
+    light = read_columns(str(path), "aggTrades", ("price", "quantity"))
+    assert list(light.columns) == ["price", "quantity"]
+    assert light.index.equals(full.index) and light["price"].tolist() == full["price"].tolist()
 
 
 def test_read_klines_and_roundtrip_csv(tmp_path):
