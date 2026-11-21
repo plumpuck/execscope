@@ -37,8 +37,11 @@ python -W ignore -m execscope.experiments.cli e1 --data data/btcusdt_1m.csv
 See `docs/guide.md` for E1-E5, data download and the dashboard (`uvicorn execscope.service.app:app`).
 
 ## Status
-Roadmap v2 Tier 1-3 implemented and tested on synthetic data. **Real-data results: not yet produced.**
-Untested here: Docker build, Windows run.
+Roadmap v2 Tier 1-3 implemented. E1-E5 have real-data runs on one week of BTCUSDT spot data;
+see [results and limitations](notes/results.md). Windows runs have been verified; Docker build remains unverified.
+The historical E3 reference depth is still an assumption. A separate
+[observed L2 depth workflow](docs/depth-calibration.md) collects public snapshots and replays
+static liquidity sweeps, without treating current books as historical market-impact calibration.
 
 ## Credit and license
 Uses NautilusTrader (LGPL-3.0) as a library through its public API. No Nautilus source is copied
