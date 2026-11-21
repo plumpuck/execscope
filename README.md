@@ -6,6 +6,11 @@ what did it cost versus the arrival price, the interval VWAP and the Perold shor
 much can we trust the backtest's fill model?*
 
 ## Layout
+
+Learning entry: [S&T / Trading System knowledge handbook](notes/trading-system-handbook.html)
+(HTML, with an observed-L2 walkthrough, interactive sweep example and current implementation status).
+The [ExecScope notebook](notes/execscope-notes.html) links to the same guide.
+
 | Folder | What is in it |
 |---|---|
 | `src/execscope/tca/` | `metrics.py`, `shortfall.py` (Perold IS: delay / execution / opportunity / fees), `benchmarks.py` (arrival, VWAP, close, participation) |

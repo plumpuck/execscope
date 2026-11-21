@@ -1,0 +1,692 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><style>
+.l2flow{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:18px 0}
+.l2flow span{flex:1;min-width:160px;border:1px solid var(--line);border-top:3px solid var(--accent);padding:12px;border-radius:6px;background:var(--panel)}
+.l2controls{display:flex;gap:16px;flex-wrap:wrap;margin:12px 0}.l2controls label{display:flex;align-items:center;gap:8px}
+.l2controls select,.l2controls input{font:inherit;max-width:100%;border:1px solid var(--line);border-radius:5px;padding:6px;background:var(--panel);color:var(--ink)}
+.l2controls input{width:100px}.l2demo{padding:16px;background:var(--accent-soft);border-radius:6px;margin-bottom:14px}
+.l2cmd{overflow:auto;max-width:100%;padding:14px;background:var(--accent-soft);border:1px solid var(--line);border-radius:6px;font-family:var(--mono);font-size:13px}
+.l2hash{overflow-wrap:anywhere}#depth .ex{margin:24px 0}#depth details{border-bottom:1px solid var(--line);padding:10px 0}#depth summary{cursor:pointer;font-weight:600}
+@media(max-width:600px){.l2flow>b{display:none}.l2flow span{min-width:calc(50% - 12px)}#depth .ex{padding:12px}.l2controls label{width:100%}}
+</style></head><body>
+<title>Trading System 知识导图</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;900&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: trading-blotter page — sticky tab rail, one section per tab, ticket-like cards only where an object stands alone */
+:root{
+  --bg:#f3f4f1; --panel:#ffffff; --ink:#17201f; --muted:#5d6966; --line:#d6dcd8;
+  --accent:#0f6b5c; --accent-soft:#e1efeb; --bid:#1f6fb2; --ask:#b5452b; --warn:#9a6a00; --warn-soft:#f6edd5;
+  --display:"Noto Serif SC","Songti SC",serif; --body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111816; --panel:#18211f; --ink:#e4ebe8; --muted:#97a6a1; --line:#2d3a37;
+  --accent:#4cc2a8; --accent-soft:#183a33; --bid:#6fb0eb; --ask:#ec8a70; --warn:#e2b54e; --warn-soft:#3a3018; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111816; --panel:#18211f; --ink:#e4ebe8; --muted:#97a6a1; --line:#2d3a37;
+  --accent:#4cc2a8; --accent-soft:#183a33; --bid:#6fb0eb; --ask:#ec8a70; --warn:#e2b54e; --warn-soft:#3a3018; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{padding-block:36px 20px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(28px,5vw,44px);line-height:1.2;margin:.3em 0 .4em;text-wrap:balance}
+h2{font-family:var(--display);font-size:clamp(22px,3.4vw,30px);margin:0 0 .4em;text-wrap:balance}
+h3{font-size:17px;margin:0 0 .3em}
+p{margin:0 0 .8em}
+.lead{max-width:68ch;color:var(--muted)}
+.ticker{display:flex;flex-wrap:wrap;gap:8px 18px;font-family:var(--mono);font-size:13px;margin-top:14px}
+.ticker span b{color:var(--accent);font-weight:600}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto;padding-block:8px;scrollbar-width:thin}
+nav.tabs button{flex:none;font:500 14px var(--body);color:var(--muted);background:none;border:1px solid transparent;border-radius:6px;padding:6px 12px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+nav.tabs button:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+section.pane{padding-block:28px 56px}
+.note{font-size:13px;color:var(--muted);border-left:3px solid var(--line);padding-left:10px;max-width:72ch}
+.warn{background:var(--warn-soft);color:var(--ink);border-radius:6px;padding:10px 14px;font-size:14px;max-width:80ch}
+.warn b{color:var(--warn)}
+a{color:var(--accent)}
+code,.mono{font-family:var(--mono);font-size:.9em}
+.tag{display:inline-block;font:500 11px var(--mono);letter-spacing:.04em;padding:1px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted);vertical-align:2px;white-space:nowrap}
+.tag.ex{border-color:var(--accent);color:var(--accent)}
+.tag.uv{border-color:var(--warn);color:var(--warn)}
+
+/* S&T flow */
+.lanes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0 26px}
+.lane{border-top:4px solid var(--c);padding-top:10px}
+.lane h3{color:var(--c)}
+.lane p{font-size:14px;color:var(--muted)}
+.flow{list-style:none;padding:0;margin:0;display:grid;gap:0;counter-reset:s}
+.flow li{display:grid;grid-template-columns:52px minmax(0,1fr);gap:14px;padding:14px 0;border-bottom:1px dashed var(--line);counter-increment:s}
+.flow li::before{content:counter(s,decimal-leading-zero);font:600 20px var(--mono);color:var(--c,var(--accent))}
+.flow .who{font:500 12px var(--mono);color:var(--c,var(--accent));letter-spacing:.06em;text-transform:uppercase}
+.flow h3{margin:.1em 0 .2em}
+.flow p{margin:0;font-size:14px}
+.flow .eg{margin-top:6px;font-size:13px;color:var(--muted)}
+.fo{--c:var(--bid)} .mo{--c:var(--accent)} .bo{--c:var(--ask)}
+.example-ticket{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin:26px 0;font-family:var(--mono);font-size:13px;overflow-x:auto}
+.example-ticket .row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;padding:3px 0;min-width:420px}
+.example-ticket .k{color:var(--muted)}
+
+/* desks */
+.filter{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 18px}
+.filter button{font:500 13px var(--body);border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:4px 12px;cursor:pointer}
+.filter button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.desks{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.desk{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.desk .div{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.desk h3{font-size:18px}
+.desk dl{margin:0;display:grid;grid-template-columns:64px minmax(0,1fr);gap:4px 10px;font-size:13.5px}
+.desk dt{color:var(--muted);font-weight:500}
+.desk dd{margin:0}
+.desk .fit{margin-top:auto;font-size:13px;border-top:1px dashed var(--line);padding-top:8px;color:var(--muted)}
+.desk .fit b{color:var(--accent)}
+.tbl-wrap{overflow-x:auto;margin:14px 0 24px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:640px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 12px var(--mono);letter-spacing:.05em;color:var(--muted);text-transform:uppercase;background:var(--bg)}
+tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.tot{font-weight:600;color:var(--accent)}
+
+/* map */
+.mapsearch{width:100%;max-width:420px;font:15px var(--body);padding:8px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);margin:6px 0 4px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--muted);margin:8px 0 18px}
+.cat{border-top:1px solid var(--line)}
+.cat>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:14px 0}
+.cat>summary::-webkit-details-marker{display:none}
+.cat>summary .n{font:600 18px var(--mono);color:var(--accent)}
+.cat>summary h3{font-family:var(--display);font-size:20px;margin:0}
+.cat>summary .cnt{font:12px var(--mono);color:var(--muted)}
+.cat[open]>summary .cnt::after{content:" ▴"} .cat:not([open])>summary .cnt::after{content:" ▾"}
+.nodes{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:2px 26px;padding:0 0 18px 56px}
+.node{padding:8px 0;border-bottom:1px dotted var(--line);min-width:0}
+.node .t{font-weight:700}
+.node .en{font:12.5px var(--mono);color:var(--muted)}
+.node .d{font-size:14px;margin:2px 0 0}
+.node .x{font-size:13px;color:var(--accent);margin-top:2px}
+.node .src{font-size:12px;color:var(--muted)}
+.node.hl{background:var(--accent-soft)}
+.node[hidden]{display:none!important}
+
+/* TCA */
+.ex{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;margin:0 0 18px}
+.ex .hd{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;margin-bottom:6px}
+.steps{counter-reset:k;list-style:none;padding:0;margin:8px 0;display:grid;gap:4px}
+.steps li{counter-increment:k;display:grid;grid-template-columns:28px minmax(0,1fr);font-size:14px}
+.steps li::before{content:counter(k);font:600 13px var(--mono);color:var(--accent)}
+.result{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.result div{border:1px solid var(--line);border-radius:6px;padding:6px 12px;font-family:var(--mono);font-size:13px}
+.result b{display:block;font-size:20px;color:var(--accent);font-variant-numeric:tabular-nums}
+.bar{display:flex;height:26px;border-radius:4px;overflow:hidden;margin:10px 0 4px;font:500 11px var(--mono);color:#fff}
+.bar span{display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden}
+.barkey{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--muted)}
+.barkey i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+.calc label{font-size:12.5px;color:var(--muted);display:grid;gap:3px}
+.calc input{font:14px var(--mono);padding:6px 8px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--ink);width:100%}
+.reading ol{padding-left:1.4em;max-width:76ch} .reading li{margin-bottom:8px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+footer{border-top:1px solid var(--line);padding-block:20px 40px;font-size:13px;color:var(--muted)}
+@media (max-width:760px){.lanes,.two{grid-template-columns:1fr}.nodes{padding-left:0}.flow li{grid-template-columns:40px minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">ExecScope · S&amp;T 学习地图 · 实操更新 2026-11-21</div>
+    <h1>Trading System 知识导图</h1>
+    <p class="lead">从“客户打来电话”到“交易结算完、做完 TCA”，把 Sales &amp; Trading 的流程、各个 desk 的分工、交易系统的技术栈和 TCA 算例放在同一张图里。绿色标注的地方是 ExecScope 正在做的位置。</p>
+    <div class="ticker">
+      <span>引擎 <b>NautilusTrader 1.231.0</b></span>
+      <span>主指标 <b>Arrival IS (bps)</b></span>
+      <span>辅指标 <b>VWAP 滑点 · markout</b></span>
+      <span>美国股票结算 <b>T+1</b></span>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="章节">
+  <div class="wrap" role="tablist">
+    <button role="tab" data-tab="flow" aria-selected="true">① S&amp;T 全流程</button>
+    <button role="tab" data-tab="desks" aria-selected="false">② 各个 Desk</button>
+    <button role="tab" data-tab="map" aria-selected="false">③ 知识导图</button>
+    <button role="tab" data-tab="verify" aria-selected="false">④ ExecScope 概念查证</button>
+    <button role="tab" data-tab="tca" aria-selected="false">⑤ TCA 算例</button>
+    <button role="tab" data-tab="read" aria-selected="false">⑥ 学习路径</button>
+    <button role="tab" data-tab="depth" aria-selected="false">⑦ 真实盘口实操</button>
+  </div>
+</nav>
+
+<main>
+<div class="wrap" style="padding-top:16px"><p class="note">本手册延续原 S&amp;T／Trading System 知识导图。新功能的使用方法、实测进度和理解见“⑦ 真实盘口实操”；其余章节中的早期实现状态仅作历史参考。</p></div>
+<!-- ============ FLOW ============ -->
+<section class="pane wrap" id="flow" role="tabpanel">
+  <h2>一笔交易在投行里怎么走完一生</h2>
+  <p class="lead">投行（卖方 sell-side）的 Sales &amp; Trading 部门服务基金、养老金、保险、企业等客户（买方 buy-side）。整个流程分三段：前台赚钱和承担风险，中台控制风险和核算盈亏，后台把交易落地结算。</p>
+
+  <div class="lanes">
+    <div class="lane fo" style="--c:var(--bid)"><h3>前台 Front Office</h3><p>Sales、Sales-Trader、Trader、Structurer、Strats/Quants、Research。直接面对客户和市场，产生收入，承担市场风险。</p></div>
+    <div class="lane mo" style="--c:var(--accent)"><h3>中台 Middle Office</h3><p>Market Risk、Product Control（PnL 核算）、Trade Support、Compliance、TCA/Best-Ex 团队。独立于交易员核对风险和盈亏。</p></div>
+    <div class="lane bo" style="--c:var(--ask)"><h3>后台 Back Office</h3><p>Operations：交易确认、清算、结算、对账、抵押品管理、资金调拨。保证钱和证券真的换手。</p></div>
+  </div>
+
+  <ol class="flow">
+    <li class="fo"><div><div class="who">Research → Sales</div><h3>研究与想法</h3><p>研究员发布个股、宏观、利率观点；Sales 每天早会（morning meeting）听完 desk 和研究的观点，打电话、发彭博消息给客户“讲故事”。</p><p class="eg">例：“美联储降息预期升温，2 年期国债可能跑赢，您要不要看看 2s10s 陡峭化交易？”</p></div></li>
+    <li class="fo"><div><div class="who">Client（买方）</div><h3>客户做出投资决策</h3><p>基金经理（PM）决定买什么、买多少，交给自己内部的交易台（buy-side trader）。这一刻的价格就是 IS 里的<b>决策价</b>。</p><p class="eg">例：PM 9:00 决定买 100,000 股 KAM，决策价 $50.00。</p></div></li>
+    <li class="fo"><div><div class="who">Buy-side trader → Sell-side</div><h3>询价或下单（RFQ / IOI / 委托）</h3><p>三种常见形态：<b>RFQ</b> 请几家投行同时报价（债券、外汇、衍生品常见）；<b>委托执行</b>把订单交给券商做代理执行（股票常见）；<b>电子直连</b> DMA、算法、电子交易平台（Tradeweb、Bloomberg、MarketAxess 等）。</p></div></li>
+    <li class="fo"><div><div class="who">Sales-Trader</div><h3>接单与沟通</h3><p>Sales-Trader 接住客户的单子，了解意图（急不急、怕不怕泄露、基准是什么），决定交给哪种执行方式，并在执行过程中持续向客户汇报进度。</p></div></li>
+    <li class="fo"><div><div class="who">Trader</div><h3>报价与风险决策（本金 vs 代理）</h3><p><b>本金交易 principal / risk</b>：交易员用公司资金做对手方，报一个价格，买下客户的风险，再在市场里慢慢对冲。赚买卖价差，承担价格风险。<b>代理交易 agency</b>：只替客户执行，收佣金，不承担价格风险。股票现货多为代理，债券和外汇多为本金。</p><p class="eg">例：客户想卖 5,000 万美元某公司债，交易员报 98.25 买入，再找其他买家或用 CDS 对冲。</p></div></li>
+    <li class="fo"><div><div class="who">Execution / Algo</div><h3>执行：父单拆子单 <span class="tag ex">ExecScope</span></h3><p>大单交给执行算法：TWAP、VWAP、POV、IS（到达价）算法。算法把父单拆成子单，经过事前风控和智能路由 SOR 发往交易所、暗池。<b>这一步就是 ExecScope 研究的环节。</b></p></div></li>
+    <li class="fo"><div><div class="who">Venue</div><h3>撮合成交</h3><p>交易所的撮合引擎按价格-时间优先撮合，返回成交回报（fill）。一个父单可能产生几百笔子单成交。</p></div></li>
+    <li class="mo"><div><div class="who">Trade Support / Middle Office</div><h3>交易录入与确认</h3><p>成交录入公司的交易系统（booking），分配到客户账户（allocation），与客户核对确认（confirmation，股票常用 CTM/OASYS，场外衍生品用 MarkitWire 等）。录错一个数字，后面全错。</p></div></li>
+    <li class="mo"><div><div class="who">Market Risk / Product Control</div><h3>风险与 PnL</h3><p>当日收盘后：Product Control 独立给持仓估值，算出每个 desk 的 PnL 并解释来源（PnL explain：价差收入、对冲损益、新交易收益）；Market Risk 计算 VaR、Greeks、压力测试，检查是否超限额。</p></div></li>
+    <li class="bo"><div><div class="who">Operations</div><h3>清算与结算</h3><p>通过中央对手方（CCP，如 DTCC/NSCC、LCH）清算，到结算日交割证券和资金。美国股票自 2024 年 5 月起是 <b>T+1</b>；外汇现货 T+2（美元兑加元等为 T+1）。失败结算（fail）要追踪处理。</p></div></li>
+    <li class="mo"><div><div class="who">TCA / Best-Ex / Compliance</div><h3>事后分析与合规 <span class="tag ex">ExecScope</span></h3><p>计算 IS、VWAP 滑点、markout，向客户出 TCA 报告，监管层面看最佳执行（MiFID II、SEC Rule 605/606）。合规团队同时监控 spoofing 等操纵行为。</p></div></li>
+    <li class="fo"><div><div class="who">反馈闭环</div><h3>结论回到下一次决策</h3><p>TCA 结论回到客户和 Sales-Trader：下次大单用哪个算法、参与率多少、拆多久。ExecScope 的 M5 看板和 M6 AI 解读就是这条反馈线。</p></div></li>
+  </ol>
+
+  <div class="example-ticket" aria-label="一张示例订单单据">
+    <div class="row"><span class="k">ORDER TICKET</span><span>示例（教学构造，非真实数据）</span></div>
+    <div class="row"><span class="k">Client</span><span>ABC Asset Mgmt · PM 决策 09:00</span></div>
+    <div class="row"><span class="k">Side / Qty</span><span>BUY 10,000 sh · XYZ</span></div>
+    <div class="row"><span class="k">Arrival mid</span><span>100.00</span></div>
+    <div class="row"><span class="k">Instruction</span><span>TWAP 5 段 · 每段 2,000 sh · Agency · 佣金 $0.005/sh</span></div>
+    <div class="row"><span class="k">Avg fill</span><span>100.056 · Interval VWAP 100.045</span></div>
+    <div class="row"><span class="k">TCA</span><span>Arrival IS 5.6 bps · VWAP slip 1.10 bps · Pcp 3.33%</span></div>
+  </div>
+  <p class="note">流程和岗位分工是行业通用知识，各家银行叫法和边界不同（例如有的把 Sales-Trader 叫 Execution Trader，有的把 TCA 放在 Electronic Trading 下）。T+1 结算日期以 SEC 规则为准。</p>
+</section>
+
+<!-- ============ DESKS ============ -->
+<section class="pane wrap" id="desks" role="tabpanel" hidden>
+  <h2>每个 Desk 在做什么</h2>
+  <p class="lead">Sales &amp; Trading 通常分成两大块：<b>Equities</b>（股票）和 <b>FICC</b>（Fixed Income, Currencies &amp; Commodities，固收、外汇、大宗商品）。每个 desk 按产品划分，里面再分 Sales、Trading、Structuring、Strats。</p>
+
+  <h3 style="margin-top:18px">前台岗位：同一个 desk 里谁做什么</h3>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>岗位</th><th>每天做什么</th><th>怎么衡量</th><th>需要的能力</th></tr></thead>
+    <tbody>
+      <tr><td><b>Sales</b></td><td>维护客户关系，推送观点和交易想法，把客户需求带回 desk</td><td>客户收入（sales credits）、客户排名（Greenwich、Coalition 调查）</td><td>沟通、产品理解、市场直觉</td></tr>
+      <tr><td><b>Sales-Trader</b></td><td>接客户的单子，选执行方式，实时汇报进度和市场颜色（market color）</td><td>执行质量、客户满意度、佣金</td><td>盘感、执行算法、TCA</td></tr>
+      <tr><td><b>Trader（Market Maker / Flow）</b></td><td>报价、持仓、对冲，管理一本账（book）的风险</td><td>PnL、风险调整收益、市场份额</td><td>定价、风险管理、快速决策</td></tr>
+      <tr><td><b>Structurer</b></td><td>为客户设计定制产品（结构化票据、奇异期权、对冲方案）</td><td>新产品收入</td><td>衍生品定价、法律与会计、表达</td></tr>
+      <tr><td><b>Strats / Quant / Desk Quant</b></td><td>写定价模型、风险工具、交易算法、自动报价系统</td><td>工具上线、为 desk 带来的收入和效率</td><td>数学、编程（Python、C++、Java）、数据</td></tr>
+      <tr><td><b>Electronic Trading / Algo Dev</b></td><td>开发和维护算法、SOR、低延迟系统、TCA 平台</td><td>系统稳定、延迟、算法表现</td><td>系统设计、低延迟、统计 <span class="tag ex">最贴近 ExecScope</span></td></tr>
+      <tr><td><b>Research</b></td><td>发布研究报告和观点（宏观、利率、信用、个股）</td><td>研究排名（Institutional Investor 等）、客户阅读量</td><td>行业分析、写作</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Desk 一览</h3>
+  <div class="filter" role="group" aria-label="按部门筛选">
+    <button aria-pressed="true" data-f="all">全部</button>
+    <button aria-pressed="false" data-f="eq">Equities</button>
+    <button aria-pressed="false" data-f="ficc">FICC</button>
+    <button aria-pressed="false" data-f="x">跨部门</button>
+  </div>
+  <div class="desks" id="deskGrid"></div>
+
+  <h3 style="margin-top:28px">赚钱方式对照</h3>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>模式</th><th>收入来源</th><th>承担的风险</th><th>典型 desk</th><th>TCA 关注点</th></tr></thead>
+    <tbody>
+      <tr><td><b>代理 Agency</b></td><td>佣金（按股或 bps）</td><td>操作风险，几乎无价格风险</td><td>Cash Equities、电子执行、Program Trading（代理部分）</td><td>相对到达价和 VWAP 的滑点，客户直接看</td></tr>
+      <tr><td><b>本金 / 做市 Principal</b></td><td>买卖价差 + 持仓损益</td><td>价格风险、库存风险、逆向选择</td><td>Rates、Credit、FX、Delta One、ETF 做市</td><td>markout（成交后价格走向）衡量被“选”的程度</td></tr>
+      <tr><td><b>风险转移 Risk Transfer</b></td><td>报价里包含风险溢价</td><td>大额风险隔夜持有</td><td>Program Trading 的 Risk Bid、Block Trading</td><td>pre-trade 冲击估计决定报价</td></tr>
+      <tr><td><b>融资 Financing</b></td><td>利差、借券费</td><td>对手方信用风险</td><td>Prime Brokerage、Repo、Securities Lending</td><td>较少涉及</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">desk 名称和归属是行业通用划分，各银行组织架构不同（例如有的把 Delta One 放在 Equity Derivatives 下，有的把 FX 放在 Macro 里）。</p>
+</section>
+
+<!-- ============ MAP ============ -->
+<section class="pane wrap" id="map" role="tabpanel" hidden>
+  <h2>Trading System 全景知识导图</h2>
+  <p class="lead">9 个大类，从市场微观结构到开源生态。每个节点有中英文名、一句话解释、与 ExecScope 的关系和来源。点大类标题可以折叠。</p>
+  <label for="q" class="note" style="border:none;padding:0">搜索概念</label><br>
+  <input id="q" class="mapsearch" type="search" placeholder="例如：markout、队列、FIX、Rule 605">
+  <div class="legend"><span><span class="tag ex">ExecScope</span> 与项目直接相关</span><span><span class="tag uv">未逐条核实</span> 通用教科书知识，本轮没找到原始来源</span></div>
+  <div id="mapRoot"></div>
+</section>
+
+<!-- ============ VERIFY ============ -->
+<section class="pane wrap" id="verify" role="tabpanel" hidden>
+  <h2>ExecScope 概念逐一查证</h2>
+  <div class="warn"><b>版本提醒：</b>nautilustrader.io 的 latest 文档现在描述 2.x（2.0.0rcN）API；你用的 1.231.0 是最后一个 1.x 版本。FillModel 导入：1.x 为 <code>nautilus_trader.backtest.models</code>，2.x 为 <code>nautilus_trader.execution</code>；TWAP：1.x 用 <code>TWAPExecAlgorithm</code>，2.x 用 <code>add_native_exec_algorithm("TwapAlgorithm", …)</code>。</div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th style="width:120px">概念</th><th>权威定义 / 事实</th><th>ExecScope 用法</th><th style="width:150px">来源</th></tr></thead>
+    <tbody id="verifyBody"></tbody>
+  </table></div>
+</section>
+
+<!-- ============ TCA ============ -->
+<section class="pane wrap" id="tca" role="tabpanel" hidden>
+  <h2>TCA 示例合集</h2>
+  <p class="lead">示例 1、2a 的数字来自外部来源；示例 2b、6 是本报告按公式构造的教学算例，可以直接写成单元测试。</p>
+
+  <article class="ex">
+    <div class="hd"><h3>示例 1 · Implementation Shortfall 完整算例</h3><span class="tag">CFA / AnalystPrep</span></div>
+    <p>PM 9:00 决定买入 100,000 股 KAM，决策价 $50.00，限价 $50.50。交易员 10:30 才下单，当时价格 $50.10。佣金 $0.05/股。收盘只成交 75,000 股，收盘价 $50.65。</p>
+    <div class="tbl-wrap" style="margin:8px 0"><table style="min-width:360px">
+      <thead><tr><th>成交</th><th class="num">价格</th><th class="num">股数</th></tr></thead>
+      <tbody><tr><td>1</td><td class="num">50.20</td><td class="num">30,000</td></tr><tr><td>2</td><td class="num">50.30</td><td class="num">20,000</td></tr><tr><td>3</td><td class="num">50.40</td><td class="num">20,000</td></tr><tr><td>4</td><td class="num">50.50</td><td class="num">5,000</td></tr></tbody>
+    </table></div>
+    <ol class="steps">
+      <li>实际成本 = 30,000×50.20 + 20,000×50.30 + 20,000×50.40 + 5,000×50.50 = <b>$3,772,500</b></li>
+      <li>纸面成本（已成交股数 × 决策价）= 75,000 × 50.00 = $3,750,000</li>
+      <li>延迟成本 = 75,000 × (50.10 − 50.00) = <b>$7,500</b></li>
+      <li>交易成本 = 3,772,500 − 75,000 × 50.10 = <b>$15,000</b></li>
+      <li>机会成本 = 25,000 × (50.65 − 50.00) = <b>$16,250</b></li>
+      <li>显性费用 = 75,000 × 0.05 = <b>$3,750</b></li>
+      <li>IS = 42,500 ÷ (100,000 × 50.00) = 0.85% = <b>85 bps</b></li>
+    </ol>
+    <div class="bar" role="img" aria-label="IS 分解：延迟 7500、交易 15000、机会 16250、费用 3750">
+      <span style="flex:7500;background:var(--bid)">延迟</span><span style="flex:15000;background:var(--accent)">交易 $15,000</span><span style="flex:16250;background:var(--ask)">机会 $16,250</span><span style="flex:3750;background:var(--warn)">费</span>
+    </div>
+    <div class="barkey"><span><i style="background:var(--bid)"></i>延迟 $7,500</span><span><i style="background:var(--accent)"></i>交易 $15,000</span><span><i style="background:var(--ask)"></i>机会 $16,250</span><span><i style="background:var(--warn)"></i>费用 $3,750</span><span>合计 $42,500</span></div>
+    <p class="note" style="margin-top:10px">AnalystPrep 页面把 $3,750,000 排版成了 “$3,7450,000”，以上已按算术校正。CFA 原版有时用“取消价”计算机会成本。Perold 原文例和 Kissell 书中例子未核实。</p>
+  </article>
+
+  <article class="ex">
+    <div class="hd"><h3>示例 2a · 到达价滑点（Hasbrouck，NYU Stern）</h3><span class="tag">课件</span></div>
+    <p>买入 10,000 股。下单时 NBB 20.02、NBO 20.05，中点 20.035。成交 3,000@20.05、2,000@20.06、5,000@20.08。</p>
+    <ol class="steps"><li>加权均价 = 0.3×20.05 + 0.2×20.06 + 0.5×20.08 = <b>20.067</b></li><li>IS = 20.067 − 20.035 = <b>$0.032/股</b> → 0.032 ÷ 20.035 ≈ <b>15.97 bps</b>（bps 换算为本报告计算）</li></ol>
+  </article>
+
+  <article class="ex">
+    <div class="hd"><h3>示例 2b · TWAP 买 10,000 股：到达价 IS 与 VWAP 滑点</h3><span class="tag ex">构造算例 · 可写测试</span></div>
+    <p>到达中点 $100.00，分 5 段，每段 2,000 股，佣金 $0.005/股。下面的计算器默认填了这组数，可以改成你回测里的数。</p>
+    <div class="tbl-wrap" style="margin:8px 0"><table id="twapTbl" style="min-width:520px">
+      <thead><tr><th>时段</th><th class="num">我方成交价</th><th class="num">我方股数</th><th class="num">市场成交量</th><th class="num">市场区间 VWAP</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <div class="calc">
+      <label for="arr">到达中点<input id="arr" type="number" step="0.01" value="100.00"></label>
+      <label for="fee">佣金 $/股<input id="fee" type="number" step="0.001" value="0.005"></label>
+    </div>
+    <div class="result" id="twapOut"></div>
+    <p style="margin-top:12px"><b>怎么读：</b>5.6 bps 的 IS 里，约 4.5 bps 是市场本身在涨（市场 VWAP 比到达价高 4.5 bps），真正归因于执行的只有约 1.1 bps。看板要两个指标一起给。</p>
+  </article>
+
+  <article class="ex">
+    <div class="hd"><h3>示例 3 · 真实 TCA 报告长什么样</h3></div>
+    <div class="tbl-wrap" style="margin:6px 0"><table>
+      <thead><tr><th style="width:170px">来源</th><th>字段与图表</th></tr></thead>
+      <tbody>
+        <tr><td>Deutsche Bank TCA Extensions</td><td>按订单规模（%ADV）分组：订单数、名义金额、ADV%、参与率 Pcp%、Arrival（bps 和以价差为单位）、VWAP、PWP 10%/15%；按成交进度十分位画 arrival 滑点累积曲线</td></tr>
+        <tr><td>BestEx Research</td><td>1 分钟和 5 分钟 markout 及标准误，以价差百分比表示；样本超过 98 万笔子单；33,000+ 父单的日内冲击曲线</td></tr>
+        <tr><td>Virtu (ITG)</td><td>Pre-trade（ACE 成本估计）、实时 TCA、事后 TCA、Peer 数据库、场所和异常监控 <span class="tag uv">厂商自报</span></td></tr>
+        <tr><td>Abel Noser</td><td>按基金、经理、券商、佣金分层；以总决策规模的 IS 定义成本；和 peer 组合比较</td></tr>
+        <tr><td>OneTick BestEx</td><td>小单：到达时相对最优价偏离、成交量/BBO 量比、5 分钟前向 markout、执行延迟；大单：订单 VWAP vs 到达价、开盘价</td></tr>
+        <tr><td>Talos（加密）</td><td>父单分 Marketable/Limited；arrival、TWAP、VWAP 滑点；同期市场涨跌</td></tr>
+        <tr><td>Proof Trading</td><td>Slippage vs Arrival、1 秒 markout、3 分钟 reversion、按券商的柱状图（Plotly 代码公开）</td></tr>
+        <tr><td>LSEG / Bloomberg BTCA</td><td>LSEG 未找到公开样例；Bloomberg 数据只有二手转引 <span class="tag uv">未核实</span></td></tr>
+      </tbody>
+    </table></div>
+    <p><b>ExecScope 推荐字段：</b><span class="mono">order_id · side · qty · filled_qty · fill_rate · arrival_mid · avg_px · IS_bps（delay/trading/opportunity/fees）· interval_VWAP · VWAP_slip_bps · TWAP_slip_bps · participation% · spread_at_arrival · markout_1s/1m/5m · fill_model · latency · book_type · seed</span></p>
+  </article>
+
+  <div class="two">
+    <article class="ex">
+      <div class="hd"><h3>示例 4 · 开源 TCA 代码</h3></div>
+      <p><b>tcapy</b>（cuemacro，Apache-2.0）：FX 现货 TCA，算 arrival、TWAP/VWAP、滑点、冲击、IS，附 notebook。项目自称 alpha，2024-02 后基本停更。</p>
+      <p><b>Proof Trading 轻量 TCA</b>（Medium 文章 + Python/Plotly 代码）：滑点、markout、reversion 按券商聚合。许可证未声明。</p>
+      <p><b>NautilusTrader 自带报告</b>：<code>generate_order_fills_report()</code>、<code>generate_positions_report()</code> 是 ExecScope TCA 的原始输入。</p>
+    </article>
+    <article class="ex">
+      <div class="hd"><h3>示例 5 · SEC Rule 605 字段（2024 修订）</h3></div>
+      <p>Summary Report 按 S&amp;P 500 / 非 S&amp;P 500 与订单类型、规模分组，列：平均订单规模、平均中点、at-or-better 比例、价格改善比例、平均 effective spread、quoted spread、<b>E/Q</b>、15 秒和 1 分钟 realized spread、平均执行速度（毫秒）。</p>
+      <p class="note">生效 2024-06-14，合规日 2025-12-14。拥有 ≥100,000 客户账户的券商也须报告。</p>
+    </article>
+  </div>
+
+  <article class="ex">
+    <div class="hd"><h3>示例 6 · 平方根冲击模型</h3><span class="tag ex">构造算例</span></div>
+    <p><span class="mono">I(Q) = Y · σ · √(Q / V)</span>，σ 是日波动率，V 是日成交量（ADV），Y 量级约为 1。</p>
+    <div class="calc">
+      <label for="sig">日波动率 σ (%)<input id="sig" type="number" step="0.1" value="2"></label>
+      <label for="qq">订单量 Q（股）<input id="qq" type="number" step="1000" value="10000"></label>
+      <label for="vv">日成交量 V（股）<input id="vv" type="number" step="10000" value="1000000"></label>
+      <label for="yy">常数 Y<input id="yy" type="number" step="0.1" value="1"></label>
+    </div>
+    <div class="result" id="sqOut"></div>
+    <p style="margin-top:10px">规模放大 10 倍，冲击只放大约 3.16 倍（凹函数）。Almgren 等 (2005) 用 Citigroup 约 70 万笔订单，发现临时冲击更接近 <b>3/5 次方</b>而不是平方根。<b>注意：</b>NautilusTrader 回放的是不变的历史行情，不会产生真实冲击，所以回测 IS 会系统性低估大单成本，AI 解读里要写成硬约束。</p>
+  </article>
+</section>
+
+<!-- ============ READING ============ -->
+<section class="pane wrap reading" id="read" role="tabpanel" hidden>
+  <h2>学习路径与阅读材料</h2>
+  <div class="two">
+    <div>
+      <h3>按顺序读</h3>
+      <ol>
+        <li><b>Larry Harris《Trading and Exchanges》</b>（2003）：订单类型、场所、流动性的总纲。先读这本。</li>
+        <li><b>Hasbrouck，NYU《Securities Trading》第 8 章 Transaction costs 课件</b>：Rule 605、限价单机会成本的例子。</li>
+        <li><b>Perold (1988) “The Implementation Shortfall: Paper versus Reality”</b>，JPM 14(3):4–9。</li>
+        <li><b>CFA L3 “Trade Strategy and Execution”</b>：IS 分解的标准写法。</li>
+        <li><b>Almgren &amp; Chriss (2000) “Optimal Execution of Portfolio Transactions”</b>，Journal of Risk 3(2)。</li>
+        <li><b>Robert Kissell《The Science of Algorithmic Trading and Portfolio Management》</b>：TCA 和 I-Star 冲击模型。</li>
+        <li><b>Cartea, Jaimungal, Penalva《Algorithmic and High-Frequency Trading》</b>（2015）：做市与高频。</li>
+        <li><b>Fabrizio Lillo “Order flow and price formation”</b>（arXiv 2105.00521，2021）：冲击实证综述。</li>
+      </ol>
+    </div>
+    <div>
+      <h3>工程与监管</h3>
+      <ol>
+        <li><a href="https://nautilustrader.io/docs/latest/concepts/architecture/" target="_blank" rel="noopener">NautilusTrader Concepts</a>：Architecture → Message Bus → Backtesting（用 1.231.0 对应版本）</li>
+        <li><a href="https://hftbacktest.readthedocs.io/" target="_blank" rel="noopener">hftbacktest 教程</a>：Getting Started → Probability Queue Models → Latency Models</li>
+        <li><a href="https://github.com/chronoxor/CppTrader" target="_blank" rel="noopener">CppTrader 源码</a>：C++ 订单簿参考</li>
+        <li><a href="https://www.sec.gov/files/rules/final/2024/34-99679.pdf" target="_blank" rel="noopener">SEC Rule 605 Final Rule (34-99679)</a></li>
+        <li><a href="https://www.esma.europa.eu/sites/default/files/library/esma35-43-3088_final_report_review_of_mifid_ii_framework_on_best_execution_reports.pdf" target="_blank" rel="noopener">ESMA 最佳执行报告 Final Report</a></li>
+      </ol>
+      <h3 style="margin-top:18px">两周落地顺序</h3>
+      <ol>
+        <li>第 1–2 天：锁 1.231.0，跑通 7 步和 TWAP，<code>on_stop</code> 平仓</li>
+        <li>第 3–5 天：TCA 核心，用示例 1、2a、2b 做单元测试</li>
+        <li>第 6–8 天：敏感性网格（fill model × seed × 延迟 × L1/L2 × 队列）</li>
+        <li>第 9–11 天：C++17 参考模拟器交叉验证</li>
+        <li>第 12–14 天：FastAPI 看板 + Rule 605 风格指标 + AI 解读</li>
+      </ol>
+    </div>
+  </div>
+  <div class="warn" style="margin-top:20px"><b>未核实或需谨慎：</b>Trade-Based Execution 页原文；Sharpe 为 nan 的官方解释（这里是推论）；Perold 和 Kissell 原文算例；LSEG 样例；Bloomberg 数据（二手）；LGPL only/or-later；策略类别、Rule 606、Reg SHO、spoofing、PTP 细节。BestEx 的 37%、Virtu 的 “>20%” 是厂商自报。LGPL 解读不构成法律意见。</div>
+</section>
+
+<!-- Observed L2 guide: additions maintained in the ExecScope repository. -->
+<section class="pane wrap" id="depth" role="tabpanel" hidden>
+  <div class="eyebrow">ExecScope · 实操与理解 · 2026-11-21</div>
+  <h2>真实盘口：先看市场有多少，再计算买得多会贵多少</h2>
+  <p class="lead">本章把“为什么做、代码在哪里、怎么运行、结果怎么看”连起来。它补上静态可见深度这一层；还没有完成真实动态市场冲击校准。</p>
+  <div class="warn"><b>最新进度：</b>E1–E5 已有一周 BTCUSDT 现货真实数据结果。2026-11-21 又完成 L2 快照采集、逐档吃单、深度不足处理与离线重放；163 个测试、ruff、mypy 通过。其他标签保留原有知识资料，其中的早期项目状态和版本说明应结合当前仓库核对。</div>
+
+  <article class="ex">
+    <h3>1 · 这一步解决了什么问题？</h3>
+    <p>旧 E3 把最优档的数量设为“第一根 K 线成交量 × 25%”。但<b>成交量是已经发生的交易，挂单量是当前等待被买卖的数量</b>，两者不是一回事。像一家店今天卖出 100 件，不代表现在货架上还有 25 件。</p>
+    <p>L2（Level 2，多档盘口）告诉我们每个价格上当前挂着多少量。买单从最便宜的卖价往上吃；卖单从最高的买价往下吃。新程序直接使用这些实际档位，不再为静态基准猜测一个等间距阶梯。</p>
+    <div class="l2flow"><span>公共行情快照<br><code>bids / asks</code></span><b>→</b><span>校验与保存<br>原响应 + SHA-256</span><b>→</b><span>逐档吃单<br>实际价格 × 数量</span><b>→</b><span>结果与边界<br>成本 / 成交率 / 未成交量</span></div>
+    <p class="note">这是只读行情研究：不连接交易账户，不发真实订单。快照 REST 响应提供 update ID，没有交易所事件时间；文件记录的是本地 UTC 请求起止时间。</p>
+  </article>
+
+  <article class="ex">
+    <h3>2 · 动手理解“逐档吃单”</h3>
+    <p>教学盘口：买一 99 元 × 2，买二 97 元 × 3；卖一 101 元 × 1，卖二 104 元 × 2。中间价是 (99 + 101) ÷ 2 = 100 元。这里的数字是教学例子。</p>
+    <div class="l2controls"><label>方向 <select id="depthSide"><option value="BUY">BUY 买入：吃卖盘</option><option value="SELL">SELL 卖出：吃买盘</option></select></label><label>目标数量 <input id="depthQty" type="number" min="0.001" step="0.1" value="2"></label></div>
+    <div id="depthDemo" class="l2demo" aria-live="polite"></div>
+    <p>试试买 2 个：1 个按 101 元、1 个按 104 元，均价 (101 + 104) ÷ 2 = 102.5 元。再试买 10 个：只看见 3 个可卖，剩下 7 个无法定价。<b>已成交部分的均价不能冒充整单均价。</b></p>
+    <p>买单成本 = (均价 − 基准价) ÷ 基准价 × 10,000；卖单反过来。1 bp 是万分之一。相对中间价的成本包含跨越买卖价差；相对最优卖价／买价的成本只衡量继续吃深档位的代价。</p>
+  </article>
+
+  <article class="ex">
+    <h3>3 · PowerShell 一条一条运行</h3>
+    <p>先打开项目目录。不用激活环境，下面直接调用项目的 Python。</p>
+    <pre class="l2cmd"><code>cd C:\Users\HP\execscope</code></pre>
+    <p><b>先读已有结果：</b>这条命令完全离线，不会重新采集行情。</p>
+    <pre class="l2cmd"><code>.\.venv\Scripts\python.exe -m execscope.experiments.depth analyse --input data/raw/depth-BTCUSDT-20261121.jsonl --out results/depth-BTCUSDT-20261121</code></pre>
+    <p><b>要采新数据时：</b>换一个从未使用的文件名。默认例子采 6 次，每次响应后至少等 5 秒，每侧取 1,000 档。若文件名已存在，程序拒绝覆盖；接口拒绝或网络失败会停止，并保留此前成功的记录。</p>
+    <pre class="l2cmd"><code>.\.venv\Scripts\python.exe -m execscope.experiments.depth collect --out data/raw/depth-BTCUSDT-new-session.jsonl --samples 6 --interval 5 --limit 1000</code></pre>
+    <p>新文件采集完成后，单独运行：</p>
+    <pre class="l2cmd"><code>.\.venv\Scripts\python.exe -m execscope.experiments.depth analyse --input data/raw/depth-BTCUSDT-new-session.jsonl --out results/depth-BTCUSDT-new-session</code></pre>
+    <p class="note">PowerShell 中不要把几条命令连续粘成一行。新采样若改了文件名，analyse 的 --input 也要改成同一个名字。</p>
+  </article>
+
+  <article class="ex">
+    <h3>4 · 代码地图：读这些文件就够了</h3>
+    <div class="tbl-wrap"><table><thead><tr><th>文件</th><th>输入 → 输出</th><th>阅读时的问题</th></tr></thead><tbody>
+    <tr><td><a href="../src/execscope/experiments/depth.py"><code>experiments/depth.py</code></a></td><td>collect：公共 API → JSONL；analyse：JSONL → CSV + 汇总</td><td>怎样保存来源、校验完整性、去掉重复快照？</td></tr>
+    <tr><td><a href="../src/execscope/refsim/snapshot.py"><code>refsim/snapshot.py</code></a></td><td>parse_snapshot 校验盘口；sweep_snapshot 给出逐档成交与剩余量</td><td>为什么 BUY 用 asks，SELL 用 bids？为什么不能外推盘口之外？</td></tr>
+    <tr><td><a href="../tests/test_depth_snapshot.py"><code>tests/test_depth_snapshot.py</code></a></td><td>教学盘口 → 预期均价、成交率、非法输入处理</td><td>买 10 个时，测试如何防止程序凭空成交？</td></tr>
+    <tr><td><a href="../docs/depth-calibration.md"><code>docs/depth-calibration.md</code></a></td><td>完整操作说明与方法边界</td><td>哪些参数已有实测，哪些还未知？</td></tr>
+    </tbody></table></div>
+  </article>
+
+  <article class="ex">
+    <h3>5 · 三个输出文件分别读什么</h3>
+    <ul>
+      <li><code>depth_profiles.csv</code>：每档价格、数量和累计深度。想知道“要买 60 BTC 会吃到第几档”，从这里查。</li>
+      <li><code>sweeps.csv</code>：每次快照 × 方向 × 订单大小的计算结果。先读 <code>fill_rate</code> 和 <code>unfilled_qty</code>，再读成本。</li>
+      <li><code>summary.json</code>：采样范围、输入和实现哈希、Git 版本、完整样本数与描述统计。<code>n_complete &lt; n</code> 时均值仅针对能完整成交的子集；全不完整时整单成本为 null。</li>
+    </ul>
+    <p>原始行情保存在 <code>data/raw/</code>，报告在 <code>results/</code>，两者留在本机，不随 Git 推送。离线重放同一输入，得到相同的成本汇总。</p>
+  </article>
+
+  <article class="ex">
+    <h3>6 · 这次实际采到了什么？</h3>
+    <p>BTCUSDT 现货；北京时间 <b>2026-11-21 23:45:44–23:46:18</b>（UTC 15:45:44–15:46:18）；6 个不同 update ID，每侧 1,000 档。以下是该短窗口的描述统计，<b>没有 95% 置信区间</b>：相邻快照有关联，不能把它们当独立样本。</p>
+    <div class="tbl-wrap"><table><thead><tr><th>方向</th><th>目标 BTC</th><th>完整样本 / 全部</th><th>完整样本平均成本<br>相对中间价 · bp</th><th>最低成交率</th></tr></thead><tbody><tr><td>BUY</td><td>1</td><td>6/6</td><td>0.6811</td><td>100.00%</td></tr>
+<tr><td>BUY</td><td>5</td><td>6/6</td><td>1.0508</td><td>100.00%</td></tr>
+<tr><td>BUY</td><td>20</td><td>6/6</td><td>2.4604</td><td>100.00%</td></tr>
+<tr><td>BUY</td><td>60</td><td>6/6</td><td>6.4600</td><td>100.00%</td></tr>
+<tr><td>BUY</td><td>120</td><td>5/6</td><td>13.9516</td><td>95.82%</td></tr>
+<tr><td>BUY</td><td>240</td><td>0/6</td><td>无法估算整单</td><td>47.91%</td></tr>
+<tr><td>SELL</td><td>1</td><td>6/6</td><td>0.2017</td><td>100.00%</td></tr>
+<tr><td>SELL</td><td>5</td><td>6/6</td><td>0.5570</td><td>100.00%</td></tr>
+<tr><td>SELL</td><td>20</td><td>6/6</td><td>1.9562</td><td>100.00%</td></tr>
+<tr><td>SELL</td><td>60</td><td>6/6</td><td>6.2474</td><td>100.00%</td></tr>
+<tr><td>SELL</td><td>120</td><td>5/6</td><td>14.8874</td><td>89.22%</td></tr>
+<tr><td>SELL</td><td>240</td><td>0/6</td><td>无法估算整单</td><td>44.61%</td></tr>
+</tbody></table></div>
+    <p>重点看 240 BTC：6 个快照都不足以完整定价；这不意味着实际市场一定不能成交，只意味着我们没有看到更远档位。120 BTC 只有 5 个完整样本，不能把这 5 个的均值当作全部快照都能做到的成本。</p>
+    <p class="note">原始输入 SHA-256：<code class="l2hash">99ac6e64dab6d649f1bace45745367ab38a38cccbf7d7c915135eea1a86426e0</code>。复核入口：<code>results/depth-BTCUSDT-20261121/summary.json</code>。这些成本没有扣手续费，也没有模拟延迟或撤单。</p>
+  </article>
+
+  <article class="ex">
+    <h3>7 · 为什么还不能说“市场冲击已经校准”？</h3>
+    <p><b>静态成本：</b>假设这一刻的可见卖单都能买到，要支付多少。<b>动态冲击：</b>我们交易后，别人会撤单、补单，价格也可能继续移动。静态快照只回答前一个问题。</p>
+    <p>当前已观测的是每档价格、深度、价差。仍未知的是恢复速度 resilience、永久冲击 permanent impact、真实延迟及隐藏流动性。今天的快照也不能回填成十月底历史实验的盘口，更不能把今天约 6 bp 与旧 E3 数字直接相减，称作“历史模型低估量”。</p>
+    <p>下一阶段：积累同时间段的连续盘口更新与成交流，检查更新是否断档，再研究补单与价格变化。永久冲击还需要识别设计，不能仅靠静态深度曲线推出来。</p>
+  </article>
+
+  <article class="ex">
+    <h3>8 · 自测：能解释清楚，就能讲给面试官听</h3>
+    <details><summary>为什么不能用 K 线成交量当最优档挂单量？</summary><p>一个是区间里已发生的交易，一个是某一刻仍在等待成交的库存；同样的历史成交量可以对应完全不同的当前深度。</p></details>
+    <details><summary>买单已经成交了 30%，为什么不直接给出整单成本？</summary><p>剩下 70% 的价格未知。只报已成交部分的均价会掩盖未完成订单；因此单列部分成本，整单成本保持为空。</p></details>
+    <details><summary>这次最准确的一句话项目描述是什么？</summary><p>“我增加了可复现的公共 L2 快照采集和静态流动性基准，逐档使用真实数量，显式处理深度不足；动态冲击与历史 E3 校准仍待验证。”</p></details>
+    <p><a href="execscope-notes.html">回到 ExecScope 学习笔记</a> · <a href="https://github.com/plumpuck/execscope/commit/9f69c369574a4aaabebbd55c9df02cde651d2605">本章对应的功能代码提交</a> · <a href="https://github.com/binance/binance-spot-api-docs/blob/master/faqs/market_data_only.md">Binance 公共行情来源</a></p>
+  </article>
+</section>
+
+</main>
+
+<footer><div class="wrap">基于 2026-10-08 深度调研报告整理，并补充 Sales &amp; Trading 流程与 desk 分工（行业通用知识）。API 以所装版本的文档和源码为准。</div></footer>
+
+<script>
+const DESKS=[
+ {f:"eq",div:"Equities",name:"Cash Equities（High-Touch）",what:"人工接机构大单，Sales-Trader 帮客户找流动性、做大宗（block）、拆单执行",cli:"共同基金、养老金、对冲基金",earn:"佣金，代理为主",risk:"信息泄露、执行质量",fit:"<b>直接相关：</b>执行质量和 TCA 是客户评价它的主要依据"},
+ {f:"eq",div:"Equities",name:"Electronic Trading / Algo Execution",what:"提供 VWAP、TWAP、POV、IS 算法和 DMA、智能路由 SOR，客户自己下单给算法",cli:"量化基金、资管、券商",earn:"低佣金、走量",risk:"系统故障、延迟、算法表现",fit:"<b>最贴近 ExecScope：</b>拆单算法、回测、TCA 都在这里"},
+ {f:"eq",div:"Equities",name:"Program / Portfolio Trading",what:"一次性交易一篮子股票（调仓、指数再平衡）；可代理执行，也可报 Risk Bid 整体买下",cli:"指数基金、转型管理（transition）",earn:"佣金或风险溢价",risk:"一篮子的市场风险和冲击",fit:"<b>相关：</b>Risk Bid 定价依赖 pre-trade 冲击模型"},
+ {f:"eq",div:"Equities",name:"Equity Derivatives（Flow / Exotics）",what:"上市和场外期权、波动率交易、结构化票据；交易员管理 Delta、Gamma、Vega",cli:"对冲基金、私人银行、保险",earn:"价差 + 波动率定价",risk:"Greeks、模型风险",fit:"间接：对冲交易也需要执行"},
+ {f:"eq",div:"Equities",name:"Delta One",what:"线性产品：ETF 做市、期货、总收益互换（TRS）、指数套利，用资产负债表提供合成敞口",cli:"对冲基金、资管",earn:"融资利差、套利",risk:"基差、分红、融资成本",fit:"间接：期货和 ETF 执行"},
+ {f:"eq",div:"Equities",name:"Prime Brokerage / Securities Lending",what:"给对冲基金提供融资、融券、托管、清算、报表",cli:"对冲基金",earn:"融资利差、借券费",risk:"对手方信用",fit:"较远"},
+ {f:"eq",div:"Equities",name:"ECM Syndicate",what:"IPO、增发、大宗配售的定价和分配，连接投行部门和 Sales",cli:"发行人、机构投资者",earn:"承销费",risk:"承销风险",fit:"较远"},
+ {f:"ficc",div:"FICC · Rates",name:"Rates（国债、利率互换）",what:"政府债券做市、利率互换（IRS）、国债期货、利率期权（swaption、cap/floor）",cli:"央行、养老金、保险、企业财务",earn:"价差 + 持仓",risk:"利率曲线（DV01）、基差",fit:"国债电子化程度高，算法执行在增长"},
+ {f:"ficc",div:"FICC · Credit",name:"Credit（公司债、CDS）",what:"投资级和高收益公司债做市、CDS、信用指数（CDX、iTraxx）；流动性比股票差，大量 RFQ",cli:"资管、保险、对冲基金",earn:"价差，持有库存",risk:"信用利差、违约、库存流动性",fit:"债券 TCA 难在没有统一成交价，常用组合交易（portfolio trading）"},
+ {f:"ficc",div:"FICC · FX",name:"FX（即期、远期、掉期、期权）",what:"24 小时全球市场；即期电子化程度最高，有自动报价引擎和算法执行（FX TWAP 很常见）",cli:"企业、资管、央行、对冲基金",earn:"价差",risk:"汇率、市场跳空",fit:"<b>相关：</b>你用的 6E 欧元期货样例和 tcapy 都在 FX 领域"},
+ {f:"ficc",div:"FICC · Commodities",name:"Commodities（能源、金属、农产品）",what:"期货、互换和实物交易，帮生产商和消费者对冲价格",cli:"航空公司、矿企、能源公司",earn:"价差 + 结构化对冲",risk:"价格、物流、季节性",fit:"间接"},
+ {f:"ficc",div:"FICC · Securitized",name:"Securitized Products（MBS/ABS）",what:"抵押贷款支持证券、资产支持证券的做市和结构化，TBA 市场",cli:"银行、资管、保险",earn:"价差",risk:"提前还款、利率、模型",fit:"较远"},
+ {f:"ficc",div:"FICC · EM",name:"Emerging Markets",what:"新兴市场的主权债、外汇和衍生品，跨资产",cli:"全球宏观基金、资管",earn:"价差",risk:"政治、资本管制、流动性",fit:"较远"},
+ {f:"x",div:"跨部门",name:"Repo / Financing / Treasury",what:"回购融资、抵押品管理、短期资金；为整个交易部门提供资金",cli:"内部 desk、货币基金",earn:"利差",risk:"流动性、抵押品价值",fit:"较远"},
+ {f:"x",div:"跨部门",name:"XVA Desk",what:"给场外衍生品计算和对冲信用估值调整（CVA、FVA 等）",cli:"内部 desk",earn:"成本中心 / 定价",risk:"对手方信用、资金成本",fit:"较远"},
+ {f:"x",div:"跨部门",name:"Strats / Quant 团队",what:"定价模型、风险工具、自动做市、执行算法、数据平台，分布在各 desk",cli:"内部交易员和 Sales",earn:"支持收入",risk:"模型风险",fit:"<b>实习常见入口：</b>ExecScope 展示的就是这类能力"},
+ {f:"x",div:"跨部门",name:"TCA / Best Execution",what:"计算执行质量、出客户 TCA 报告、监管最佳执行和 Rule 605/606 报告",cli:"客户、监管、合规",earn:"支持销售",risk:"合规风险",fit:"<b>直接相关：</b>ExecScope 的 M2、M5、M6"}
+];
+const MAP=[
+ {n:"1",t:"市场微观结构",en:"Market Microstructure",items:[
+  ["市价单","Market Order","不限价，立即按对手方最优价成交，代价是付出价差和冲击","TWAP 子单在 Nautilus 示例中是市价单","Nautilus Strategies 文档"],
+  ["限价单","Limit Order","指定最差可接受价，可能挂单等待（maker）","触价是否成交由 prob_fill_on_limit 控制","Nautilus Fill Models"],
+  ["止损 / 止损限价","Stop / Stop-Limit","价格触发后转为市价或限价单","1.x 的 prob_fill_on_stop 已弃用","Nautilus backtesting（1.x）"],
+  ["IOC / FOK / GTC / GTD","Time in Force","立即成交余量撤 / 全成否则全撤 / 一直有效 / 到期失效","TWAP 父单的 TimeInForce 参数","Nautilus；CppTrader"],
+  ["冰山单","Iceberg","只显示部分数量，成交后补显","可在 C++ 参考模拟器实现","order-matcher 项目"],
+  ["Post-only / GTX","Post-only","保证只做 maker，会立即成交就拒绝","hftbacktest 示例使用","hftbacktest 教程"],
+  ["限价订单簿","Limit Order Book","按价位聚合买卖挂单的数据结构","C++17 模拟器核心；CppTrader 用 AVL 树","CppTrader 文档"],
+  ["价格-时间优先","Price-Time Priority","同价位先到先成交","队列位置建模的前提","hftbacktest"],
+  ["BBO / NBBO","Best Bid & Offer","最高买价和最低卖价；NBBO 是美国全市场最优价","到达中点的来源","Hasbrouck 课件"],
+  ["买卖价差 / 中点","Spread / Midpoint","ask − bid；中点是最常用的到达基准","spread cost = 成交价 − 中点","Hasbrouck 课件"],
+  ["市场深度","Market Depth","各价位可成交的挂单量","L2 下撮合逐档吃单","Nautilus Fill Models"],
+  ["最小价位 / 手数","Tick / Lot Size","最小价格变动和数量单位","prob_slippage 的单位是 1 tick","Nautilus；hftbacktest"],
+  ["L1 行情","Top of Book","只有最优买卖价和量","BookType.L1_MBP，无法可靠估计队列","Nautilus Fill Models"],
+  ["L2 = MBP","Market-By-Price","按价位聚合的深度","L2_MBP","hftbacktest"],
+  ["L3 = MBO","Market-By-Order","逐笔订单事件，可精确重建队列","L3_MBO","Nautilus Databento 集成"],
+  ["K 线 / Tick / 订单簿","Bar / Tick / Book","K 线丢失盘中路径，tick 有成交和报价，簿有深度","Bar 执行会合成开→高→低→收路径","Nautilus Bar-Based Execution"],
+  ["NASDAQ ITCH","ITCH","纳斯达克逐笔 MBO 二进制协议","CppTrader 处理约 24 ns/消息","CppTrader README"],
+  ["做市商","Market Maker","双边报价赚价差，承担库存和逆向选择风险","","Harris",1],
+  ["交易所 / ECN / 暗池","Venues","显示型撮合场所、电子网络、不显示报价的 ATS","Rule 605 修订要求 ATS 单独报告","Cleary 解读"],
+  ["集合竞价","Auction","开盘、收盘单一价格集中撮合","收盘价基准的来源","",1],
+  ["Maker / Taker 费用","Fee Model","挂单方返佣或低费，吃单方付费","MakerTakerFeeModel","Nautilus；hftbacktest"]]},
+ {n:"2",t:"交易系统架构",en:"System Architecture",items:[
+  ["行情接入","Feed Handler","把交易所原始协议解码成内部事件","Nautilus DataClient / adapter","CppTrader；Nautilus"],
+  ["订单管理系统","OMS","管理订单状态和仓位归属","OmsType.NETTING / HEDGING","Nautilus Execution"],
+  ["执行管理系统","EMS","交易员用的执行工具：算法、路由、实时 TCA","ExecScope 位于此处","Virtu 2019 演示"],
+  ["事前风控","Pre-trade Risk","下单前检查数量、名义金额、余额、频率","Nautilus RiskEngine","Nautilus Architecture"],
+  ["智能订单路由","SOR","跨场所拆分和路由子单","可作扩展","Virtu 演示"],
+  ["策略引擎","Strategy Engine / Trader","承载策略和执行算法的生命周期","Nautilus Trader 组件","Nautilus Architecture"],
+  ["消息总线","MessageBus","组件间 pub/sub、req/rep、点对点通信","自定义 Actor 订阅成交写 TCA","Nautilus Message Bus"],
+  ["缓存","Cache","集中存放品种、订单、持仓、行情","TCA 从 cache 读订单和成交","Nautilus Cache"],
+  ["FIX 协议","Financial Information eXchange","机构间订单和成交回报的标准消息协议","TCA 数据常用 FIX 补齐","Wikipedia TCA"],
+  ["低延迟技术","Kernel bypass / FPGA / Colo / PTP","内核旁路、硬件订单簿、机房托管、精确时间同步","","GitHub topics；PTP 未核实",1],
+  ["确定性单线程内核","Deterministic Core","优先正确和可复现，扩展靠水平扩容","解释回测为何可复现","Nautilus 博客"]]},
+ {n:"3",t:"执行算法",en:"Execution Algorithms",items:[
+  ["父单 / 子单","Parent / Child Order","大单拆成多个小单分时执行","ExecScope 核心对象","Hasbrouck 课件"],
+  ["TWAP","Time-Weighted","时间窗内等间隔等量切分","Nautilus 内置，horizon_secs、interval_secs","Nautilus Execution"],
+  ["VWAP","Volume-Weighted","按历史成交量曲线（常为 U 形）分配","Nautilus 无官方实现，需自写","GitHub issue #3839"],
+  ["POV / 参与率","Percentage of Volume","按市场实时成交量的固定比例下单","需自写；TCA 常按参与率分组","Deutsche Bank TCA"],
+  ["IS / 到达价算法","Arrival Price Algo","最小化相对到达价的成本，通常前置执行","可作对比算法","ITG/Mittal；BestEx（厂商数据）"],
+  ["Almgren–Chriss","Optimal Execution","在冲击成本和波动风险之间做均值-方差权衡","pre-trade 调度基线","Almgren & Chriss 2000"],
+  ["队列博弈","Queue Games","队列薄就排队，厚就改善一个 tick 抢优先","hftbacktest 有教程","hftbacktest"]]},
+ {n:"4",t:"交易成本分析",en:"TCA",items:[
+  ["事前 / 事中 / 事后 TCA","Pre / Intra / Post-trade","事前估成本选策略，事中监控，事后归因","ExecScope 主做事后","Virtu；Wikipedia"],
+  ["基准","Benchmarks","到达价、区间 VWAP/TWAP、收盘价、前收、PWP、开盘价","看板要写明基准","ITG 指南"],
+  ["实施缺口","Implementation Shortfall","纸面组合收益减实际组合收益","主指标","Perold 1988"],
+  ["扩展 IS","Wagner Decomposition","延迟 + 交易 + 机会成本 + 显性费用","见 TCA 示例 1","AnalystPrep"],
+  ["滑点 / 基点","Slippage / bps","执行价相对基准的偏离，1 bp = 0.01%","看板单位","Talos"],
+  ["有效价差","Effective Spread","成交价相对 NBBO 中点的偏离","Rule 605 核心字段","Hasbrouck"],
+  ["Markout / 实现价差","Realized Spread","成交价相对成交后 Δt 中点的偏离","衡量逆向选择","Hasbrouck；BestEx"],
+  ["市场冲击","Market Impact","交易推动价格，分临时和永久","回测不产生真实冲击","Almgren-Chriss"],
+  ["价格改善","Price Improvement","买单 NBO − p，卖单 p − NBB","Rule 605 字段","Hasbrouck"],
+  ["信息泄露 / 逆向选择","Leakage / Adverse Selection","意图被察觉导致价格跑开；限价单只在不利时成交","","Hasbrouck"],
+  ["限价单机会成本陷阱","Opportunity Cost","只评估成交的限价单会高估表现","解读 prob_fill_on_limit 实验的关键","Hasbrouck"]]},
+ {n:"5",t:"回测",en:"Backtesting",items:[
+  ["事件驱动 vs 向量化","Event-driven vs Vectorized","逐事件回放能处理订单状态和延迟；向量化快但难模拟成交","Nautilus 是事件驱动","Nautilus README"],
+  ["成交模型","Fill Model","限价触价成交概率、1 tick 滑点","敏感性维度","Nautilus Fill Models"],
+  ["延迟模型","Latency Model","对下单、改单、撤单加延迟","敏感性维度","Nautilus Behavioral Models"],
+  ["队列位置估计","Queue Position","估计自己前面还有多少量","queue_position 开关","hftbacktest"],
+  ["流动性消耗","Liquidity Consumption","同一档显示量能否被重复使用","默认 False 偏乐观","Nautilus Fill Models"],
+  ["常见偏差","Biases","前视、幸存者、过拟合、数据窥探","","López de Prado 等",1],
+  ["回测保真度","Fidelity","回测与实盘的一致程度","ExecScope 研究主题","Nautilus README"],
+  ["随机种子","Random Seed","固定 random_seed 复现概率抽签","每个实验记录 seed","Nautilus Fill Models"]]},
+ {n:"6",t:"策略类别",en:"Strategy Types",items:[
+  ["做市","Market Making","双边挂单赚价差，管理库存（Avellaneda-Stoikov、GLFT）","hftbacktest 有 GLFT 示例","",1],
+  ["统计套利","Statistical Arbitrage","相关资产价差回归","","",1],
+  ["趋势 / 动量","Trend / Momentum","顺势交易","Nautilus EMA Cross 示例","",1],
+  ["均值回归","Mean Reversion","偏离均值后反向交易","","",1],
+  ["事件驱动","Event-Driven","围绕财报、并购等事件","","",1],
+  ["高频","HFT","微秒到毫秒级，依赖延迟和队列","","",1]]},
+ {n:"7",t:"风险与组合",en:"Risk & Portfolio",items:[
+  ["仓位","Position","一个开平周期内的暴露","signed_qty 正多负空","Nautilus Positions"],
+  ["已实现 / 未实现 PnL","Realized / Unrealized","已平仓盈亏和按市值的浮盈浮亏","Portfolio 接口","Nautilus Portfolio"],
+  ["夏普比率","Sharpe","(均值 − Rf) / 标准差 × √252","观测不足时为 nan","Nautilus analysis"],
+  ["最大回撤","Max Drawdown","权益从峰值到谷底的最大跌幅","tearsheet 图","Nautilus Visualization"],
+  ["VaR","Value at Risk","给定置信度下的最大预期损失","","EconPapers"]]},
+ {n:"8",t:"监管与合规",en:"Regulation",items:[
+  ["MiFID II 最佳执行","Best Execution","为客户取得最佳结果的义务，review 后依然有效","","ESMA"],
+  ["RTS 27","Venue Reports","场所季度执行质量报告，已暂停并去优先化","","ESMA 2022 声明"],
+  ["RTS 28","Top-5 Venues","公司年度前五场所报告，已删除，2024-02-13 起不优先执法","","ESMA；DLA Piper"],
+  ["Reg NMS","Regulation NMS","美国全国市场系统规则，含 605/606","","SEC 2024-32"],
+  ["SEC Rule 605","Execution Quality","按月公开执行质量统计，2024 修订","见 TCA 示例 5","SEC 34-99679"],
+  ["SEC Rule 606","Routing Disclosure","券商订单路由披露","","",1],
+  ["Reg SHO","Short Sale","卖空定位和平仓要求","","",1],
+  ["幌骗 / 层叠","Spoofing / Layering","挂出无意成交的订单误导市场","","",1]]},
+ {n:"9",t:"开源生态",en:"Open Source",items:[
+  ["NautilusTrader","LGPL-3.0","Rust 核心、确定性事件驱动，回测与实盘同码","ExecScope 底座","GitHub README"],
+  ["hftbacktest","MIT","HFT 和做市回测，考虑延迟和队列，支持 L2/L3","对照项目","hftbacktest 文档"],
+  ["CppTrader","MIT","C++ 撮合引擎、订单簿、ITCH handler","C++17 模拟器参考","GitHub chronoxor"],
+  ["tcapy","Apache-2.0","FX 现货 TCA 库","TCA 模块对照","GitHub cuemacro"],
+  ["Backtrader / Zipline / LEAN / vectorbt","—","经典 Python 回测 / Quantopian 遗产 / C# 多资产引擎 / 向量化回测","","",1]]}
+];
+const VER=[
+ ["父单/子单","大的原始订单拆成许多子单分时执行；IS 的执行价是子单成交量加权均价","TWAP 父单 → 定时子单；TCA 在父单级聚合","Hasbrouck"],
+ ["TWAP","Nautilus 内置，参数 horizon_secs、interval_secs；最后一个间隔提交剩余量","1.231.0 用 TWAPExecAlgorithm","Nautilus Execution"],
+ ["VWAP","Nautilus 无官方实现，issue #3839 提议 U 形 volume_weights","自写，按 TWAP 模式加权","GitHub #3839"],
+ ["POV","按市场成交量比例参与","订阅成交 tick 算滚动成交量","DB TCA"],
+ ["到达价","订单到达时的 NBBO 中点","ts_init 时刻的中点","Hasbrouck"],
+ ["滑点","执行价与基准价之差（bps），正值差于基准","看板主指标","Talos"],
+ ["IS (bps)","买单 成交价 − 基准，卖单反之；完整版另计佣金、延迟、机会成本","is_bps = side × (avg_px − arrival)/arrival × 1e4","Hasbrouck；Perold"],
+ ["成交模型","默认 prob_fill_on_limit=1.0、prob_slippage=0.0；L1 下每笔成交抽签滑 1 tick，L2/L3 不适用；内置 11 种模型","网格：prob_fill_on_limit × prob_slippage × seed","fill-models.md"],
+ ["延迟模型","只有 StaticLatencyModel：base 延迟叠加 insert/update/cancel 延迟","扫 0/70/250/1000 ms；注意 issue #5054","Behavioral Models"],
+ ["L1/L2/L3","BookType.L1_MBP / L2_MBP / L3_MBO","L1 vs L2 对照实验","Fill Models"],
+ ["队列位置","1.223.0 新增 queue_position，trade_execution 默认改 True；1.224.0 支持 L1 报价队列跟踪；Trade-Based Execution 原文未核实","queue_position=True + trade_execution=True；注意 issue #5017","Release notes"],
+ ["hftbacktest 队列","RiskAdverse、PowerProb、LogProb、L3FIFO 等模型","对照 Nautilus 二元 prob_fill_on_limit","hftbacktest"],
+ ["hftbacktest 延迟","ConstantLatency、IntpOrderLatency（插值历史延迟）","对照 Nautilus 静态延迟","hftbacktest"],
+ ["MessageBus","pub/sub、req/resp、command/event；可接 Redis","自定义 Actor 写 TCA 到 Postgres","Message Bus"],
+ ["随机种子","需要复现随机抽签时设 random_seed","每个实验记录 seed，多 seed 蒙特卡洛","Fill Models"],
+ ["策略生命周期","on_start（订阅）→ on_bar 等回调 → on_stop（撤单、平仓、退订）","on_stop 里 close_all_positions","Strategies"],
+ ["回测 7 步","加载数据 → BacktestEngine → add_venue → add_instrument/add_data → add_strategy → 执行算法 → run，之后出报告","pipeline 骨架","Backtest Low-Level"],
+ ["Sharpe 为 nan","收益序列不足 2 个观测点时标准差无定义；issue #4915 证实单观测返回 NaN（官方无明文，属推论）","看板显示“N/A（观测不足）”","Portfolio；#4915"],
+ ["LGPL-3.0","可作为库使用，自有代码可用其他许可；修改并分发库本身须开源修改部分（非法律意见）","仓库不放官方示例代码","GitHub README"]
+];
+// render desks
+const grid=document.getElementById('deskGrid');
+grid.innerHTML=DESKS.map(d=>`<article class="desk" data-f="${d.f}"><div class="div">${d.div}</div><h3>${d.name}</h3><dl><dt>做什么</dt><dd>${d.what}</dd><dt>客户</dt><dd>${d.cli}</dd><dt>怎么赚</dt><dd>${d.earn}</dd><dt>主要风险</dt><dd>${d.risk}</dd></dl><div class="fit">${d.fit}</div></article>`).join('');
+document.querySelectorAll('.filter button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.filter button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  grid.querySelectorAll('.desk').forEach(c=>c.hidden=!(b.dataset.f==='all'||c.dataset.f===b.dataset.f));
+});
+// render map
+document.getElementById('mapRoot').innerHTML=MAP.map(c=>`<details class="cat" open><summary><span class="n">${c.n}</span><h3>${c.t} <span class="en mono" style="font-size:13px;color:var(--muted);font-family:var(--mono)">${c.en}</span></h3><span class="cnt">${c.items.length} 个概念</span></summary><div class="nodes">${c.items.map(i=>`<div class="node"><div class="t">${i[0]} <span class="en">${i[1]}</span>${i[5]?' <span class="tag uv">未逐条核实</span>':''}</div><p class="d">${i[2]}</p>${i[3]?`<div class="x">↳ ${i[3]}</div>`:''}${i[4]?`<div class="src">来源：${i[4]}</div>`:''}</div>`).join('')}</div></details>`).join('');
+document.getElementById('q').addEventListener('input',e=>{
+  const q=e.target.value.trim().toLowerCase();
+  document.querySelectorAll('.cat').forEach(cat=>{
+    let any=false;
+    cat.querySelectorAll('.node').forEach(n=>{const m=!q||n.textContent.toLowerCase().includes(q);n.hidden=!m;n.classList.toggle('hl',!!q&&m);if(m)any=true;});
+    cat.hidden=!any; if(q&&any)cat.open=true;
+  });
+});
+// verify
+document.getElementById('verifyBody').innerHTML=VER.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td>${r[2]}</td><td style="color:var(--muted);font-size:13px">${r[3]}</td></tr>`).join('');
+// TWAP calculator
+const rows=[[100.02,2000,50000,100.01],[100.05,2000,80000,100.04],[100.03,2000,60000,100.03],[100.08,2000,40000,100.06],[100.10,2000,70000,100.08]];
+const tb=document.querySelector('#twapTbl tbody');
+tb.innerHTML=rows.map((r,i)=>`<tr><td>${i+1}</td>${r.map((v,j)=>`<td class="num"><input id="tw${i}_${j}" aria-label="时段${i+1}列${j+1}" type="number" step="${j%2?1000:0.01}" value="${j%2?v:v.toFixed(2)}" style="width:100px;font:13px var(--mono);text-align:right;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);padding:3px 6px"></td>`).join('')}</tr>`).join('');
+function twap(){
+  const arr=+document.getElementById('arr').value, fee=+document.getElementById('fee').value;
+  let q=0,pq=0,mv=0,mpv=0,tw=0;
+  rows.forEach((_,i)=>{const p=+document.getElementById(`tw${i}_0`).value,s=+document.getElementById(`tw${i}_1`).value,v=+document.getElementById(`tw${i}_2`).value,vw=+document.getElementById(`tw${i}_3`).value;q+=s;pq+=p*s;mv+=v;mpv+=v*vw;tw+=vw;});
+  const avg=pq/q, vwap=mpv/mv, twb=tw/rows.length;
+  const is=(avg-arr)/arr*1e4, tot=is+fee/arr*1e4, vs=(avg-vwap)/vwap*1e4, ts=(avg-twb)/twb*1e4;
+  const f=(x,d=2)=>isFinite(x)?x.toFixed(d):'—';
+  document.getElementById('twapOut').innerHTML=`<div>我方均价<b>${f(avg,3)}</b></div><div>到达价 IS<b>${f(is)} bps</b>$${f((avg-arr)*q,0)}</div><div>含佣金总 IS<b>${f(tot)} bps</b></div><div>市场 VWAP<b>${f(vwap,3)}</b></div><div>VWAP 滑点<b>${f(vs)} bps</b></div><div>TWAP 滑点<b>${f(ts)} bps</b></div><div>参与率<b>${f(q/mv*100)}%</b></div>`;
+}
+document.getElementById('tca').addEventListener('input',e=>{if(e.target.closest('#twapTbl')||['arr','fee'].includes(e.target.id))twap();if(['sig','qq','vv','yy'].includes(e.target.id))sq();});
+function sq(){
+  const s=+document.getElementById('sig').value/100,Q=+document.getElementById('qq').value,V=+document.getElementById('vv').value,Y=+document.getElementById('yy').value;
+  const I=Y*s*Math.sqrt(Q/V)*1e4, I10=Y*s*Math.sqrt(10*Q/V)*1e4;
+  document.getElementById('sqOut').innerHTML=`<div>Q / V<b>${(Q/V*100).toFixed(2)}%</b></div><div>预计冲击<b>${isFinite(I)?I.toFixed(1):'—'} bps</b></div><div>规模 ×10 时<b>${isFinite(I10)?I10.toFixed(1):'—'} bps</b></div>`;
+}
+twap();sq();
+// tabs
+const tabs=document.querySelectorAll('nav.tabs button');
+function show(id){tabs.forEach(t=>t.setAttribute('aria-selected',t.dataset.tab===id));document.querySelectorAll('section.pane').forEach(p=>p.hidden=p.id!==id);try{localStorage.setItem('tab',id)}catch(e){}}
+tabs.forEach(t=>t.onclick=()=>{show(t.dataset.tab);window.scrollTo({top:document.querySelector('nav.tabs').offsetTop})});
+const h=location.hash.slice(1);let saved=null;try{saved=localStorage.getItem('tab')}catch(e){}
+if([...tabs].some(t=>t.dataset.tab===h))show(h);else if(saved&&[...tabs].some(t=>t.dataset.tab===saved))show(saved);
+</script>
+
+<script>
+(function(){
+function drawDepth(){
+ const side=document.getElementById('depthSide').value;
+ const qty=Number(document.getElementById('depthQty').value), out=document.getElementById('depthDemo');
+ if(!Number.isFinite(qty)||qty<=0){out.textContent='请输入大于 0 的有限数量。';return;}
+ const levels=side==='BUY'?[[101,1],[104,2]]:[[99,2],[97,3]], sign=side==='BUY'?1:-1;
+ let left=qty,filled=0,value=0;const steps=[];
+ for(const [p,q] of levels){const take=Math.min(left,q);if(take<=0)break;filled+=take;value+=take*p;left=Math.max(0,qty-filled);steps.push(take.toFixed(2)+' × '+p);}
+ const avg=value/filled, cost=sign*(avg-100)/100*10000;
+ out.textContent='逐档：'+steps.join(' + ')+'；已成交 '+filled.toFixed(2)+'，未成交 '+left.toFixed(2)+'，成交率 '+(filled/qty*100).toFixed(1)+'%。已成交均价 '+avg.toFixed(4)+' 元；已成交部分相对中间价成本 '+cost.toFixed(2)+' bp。'+(left>0?'深度不足，整单成本未知。':'全部成交，整单成本 '+cost.toFixed(2)+' bp。');
+}
+document.getElementById('depthSide').addEventListener('change',drawDepth);
+document.getElementById('depthQty').addEventListener('input',drawDepth);drawDepth();
+})();
+</script>
+</body></html>
